@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Los Altos Boots Store Locator</title>
+  <style>
+  :root {
+    --la-red: #b01b24;
+    --la-red-dark: #8b141c;
+    --la-charcoal: #222222;
+    --la-neutral: #f5f1ea;
+    --la-border: #ddd;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top left, #f8f3ea 0, #f1ebe4 40%, #e4ded7 100%);
+    color: var(--la-charcoal);
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 20px 20px 24px;
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2ded7;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  }
+
+  h1 {
+    font-size: 26px;
+    margin: 0 0 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--la-red);
+  }
+
+  .container > p {
+    margin: 0 0 16px;
+    font-size: 14px;
+    color: #555;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+
+  .controls input,
+  .controls select {
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+    min-width: 180px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .controls input:focus,
+  .controls select:focus {
+    border-color: var(--la-red);
+    box-shadow: 0 0 0 2px rgba(176, 27, 36, 0.15);
+  }
+
+  #searchBtn,
+  #locateBtn {
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+  }
+
+  #searchBtn {
+    background: var(--la-red);
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(176, 27, 36, 0.35);
+  }
+
+  #searchBtn:hover {
+    background: var(--la-red-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(176, 27, 36, 0.45);
+  }
+
+  #locateBtn {
+    background: #ffffff;
+    color: var(--la-charcoal);
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  #locateBtn:hover {
+    border-color: var(--la-red);
+    color: var(--la-red);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  }
+
+  #status {
+    margin-left: 8px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  #map {
+    width: 100%;
+    height: 450px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+    border: 1px solid var(--la-border);
+    overflow: hidden;
+  }
+
+  #results {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--la-border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 14px;
+    background: #ffffff;
+  }
+
+  #results p {
+    margin: 4px 0;
+  }
+
+  .store-item {
+    border-bottom: 1px solid #eee;
+    padding: 8px 4px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, transform 0.05s ease;
+  }
+
+  .store-item:last-child {
+    border-bottom: none;
+  }
+
+  .store-item:hover {
+    background: #faf5f1;
+    transform: translateY(-1px);
+  }
+
+  .store-name {
+    font-weight: 600;
+    color: var(--la-charcoal);
+  }
+
+  .store-address {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .store-distance {
+    font-size: 12px;
+    color: var(--la-red-dark);
+    margin-top: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      margin: 12px;
+      padding: 16px 14px 18px;
+    }
+
+    #map {
+      height: 360px;
+    }
+
+    .controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .controls input,
+    .controls select {
+      width: 100%;
+      min-width: 0;
+    }
+
+    #searchBtn,
+    #locateBtn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    #status {
+      margin-left: 0;
+      margin-top: 4px;
+    }
+
+    #clearBtn {
+      background: #f3f3f3;
+      color: #444;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    #clearBtn:hover {
+      background: #e8e8e8;
+      color: #222;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+  }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Find a Los Altos Boots Retailer Near You</h1>
+<p>Enter your city or ZIP code to see authorized retailers within your selected radius.</p>
+
+<div class="controls">
+  <input id="locationInput" type="text" placeholder="Enter city or ZIP code">
+  <select id="radiusSelect">
+    <option value="10">10 miles</option>
+    <option value="25" selected>25 miles</option>
+    <option value="50">50 miles</option>
+  </select>
+  <button id="searchBtn">Search</button>
+  <button id="locateBtn" type="button">Use my location</button>
+  <button id="clearBtn" type="button">Clear</button>
+  <span id="status" style="margin-left:8px;font-size:13px;color:#666;"></span>
+</div>
+
+  <div id="map"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+  // 1) YOUR STORE DATA GOES HERE
+  // Replace these sample stores with your real stores.
+  const STORES = [
+{ name: "100 GRAND CLOTHING", address: "2221 W SW Loop 323, Tyler, TX 75701, USA", lat: 32.304242, lng: -95.3293676 },
+{ name: "2 HERMANOS FASHION", address: "2110 N Fourth St, Flagstaff, AZ 86004, USA", lat: 35.2092758, lng: -111.6129105 },
+{ name: "3 AMIGOS VAQUEROS", address: "315 E Casino Rd e, Everett, WA 98208, USA", lat: 47.9223285, lng: -122.2270298 },
+{ name: "3 HERMANOS", address: "6527 Pacific Blvd, Huntington Park, CA 90255, USA", lat: 33.979847, lng: -118.2256388 },
+{ name: "3 HERMANOS WESTERN WEAR", address: "2211 Belvidere Rd, Waukegan, IL 60085, USA", lat: 42.3492437, lng: -87.8588247 },
+{ name: "3 POTRILLOS WESTERN WEAR LLC.", address: "104 Rio Frio Cove, Del Valle, TX 78617, USA", lat: 30.0878197, lng: -97.6240054 },
+{ name: "5TH AVE FASHIONS", address: "841 W Main St, Peoria, IL 61606, USA", lat: 40.7000198, lng: -89.6071741 },
+{ name: "7 LEGUAS WESTERN WEAR", address: "7323 Marilyn Ln, Houston, TX 77016, USA", lat: 29.8662121, lng: -95.2969238 },
+{ name: "7 VAQUEROOZ INC.", address: "173 Grand St, White Plains, NY 10601, USA", lat: 41.0283535, lng: -73.7673347 },
+{ name: "8 SECONDS WESTERN WEAR LLC", address: "6337 Weathers Rd, Wendell, NC 27591, USA", lat: 35.8235581, lng: -78.4198681 },
+{ name: "805 WORK & PLAY GEAR", address: "280 E Thousand Oaks Blvd, Thousand Oaks, CA 91360, USA", lat: 34.1786487, lng: -118.872149 },
+{ name: "A & A WESTERN STORE", address: "2813 S MacArthur Dr, Alexandria, LA 71301, USA", lat: 31.2690431, lng: -92.4580891 },
+{ name: "A & M WESTERN WEAR", address: "502 S Allen-Genoa Rd A, South Houston, TX 77587, USA", lat: 29.6624935, lng: -95.214366 },
+{ name: "A. MATEO'S BOUTIQUE", address: "6080 W University Blvd, Odessa, TX 79764, USA", lat: 31.8531852, lng: -102.450374 },
+{ name: "ACADIAN LEATHER", address: "9010 LA-961, Clinton, LA 70722, USA", lat: 30.897273, lng: -90.9357 },
+{ name: "ACCESORIOS VAQUEROS", address: "6808 Nashville Rd, Lanham, MD 20706, USA", lat: 38.9755223, lng: -76.8872041 },
+{ name: "AGAPE MINISTRIES", address: "1337 Rosewood Ave SE, Grand Rapids, MI 49506, USA", lat: 42.9385174, lng: -85.6271947 },
+{ name: "AGUILERA WESTERN WEAR", address: "308 S McLean Blvd, Elgin, IL 60123, USA", lat: 42.0254882, lng: -88.3146676 },
+{ name: "AILYN'S BOUTIQUE LLC.", address: "64 N 800 E # 1, St. George, UT 84770, USA", lat: 37.1091496, lng: -113.5658277 },
+{ name: "AL BAR RANCH", address: "55345 N Fir Rd, Mishawaka, IN 46545, USA", lat: 41.6910121, lng: -86.1585667 },
+{ name: "ALACRAN FASHION'S", address: "65965 Pierson Blvd, Desert Hot Springs, CA 92240, USA", lat: 33.9610856, lng: -116.5105988 },
+{ name: "ALADINNO NOVEDADES", address: "49972 Cesar Chavez St, Coachella, CA 92236, USA", lat: 33.6863096, lng: -116.1811435 },
+{ name: "ALADINNOS MEN", address: "82132 CA-111, Indio, CA 92201, USA", lat: 33.7163311, lng: -116.2321458 },
+{ name: "ALADINO FASHION", address: "35460 Date Palm Dr, Cathedral City, CA 92234, USA", lat: 33.790978, lng: -116.4576314 },
+{ name: "ALCALA MENS CLOTHING STORE INC DBA ALCALA", address: "1733 W Chicago Ave, Chicago, IL 60622, USA", lat: 41.8957602, lng: -87.6710233 },
+{ name: "ALCALAS WESTERN WEAR", address: "21280 Rd 24.7 SW, Mattawa, WA 99349, USA", lat: 46.7277292, lng: -119.9436801 },
+{ name: "ALL COUNTRY WORK &WESTERN WEAR", address: "2722 E Jensen Ave, Fresno, CA 93706, USA", lat: 36.7063864, lng: -119.7793726 },
+{ name: "ALL STAR WESTERN APPAREL", address: "All Star Western Apparel Inc, 1245 Veterans Memorial Hwy SW Suite 36, Mableton, GA 30126, USA", lat: 33.8025432, lng: -84.5190401 },
+{ name: "ALVAREZ WESTERN WEAR", address: "1460 S 43rd St a 1, San Diego, CA 92113, USA", lat: 32.6907263, lng: -117.1033934 },
+{ name: "AMADO FAMILY CORP", address: "3925 Harrington Ave, Las Vegas, NV 89110, USA", lat: 36.1824968, lng: -115.0896882 },
+{ name: "AMINI'S SUIT & SHOE WEARHOUSE", address: "3308 W Camp Wisdom Rd, Dallas, TX 75237, USA", lat: 32.6622845, lng: -96.8754387 },
+{ name: "AMYS FASHION & JOE WESTERN WEAR", address: "1973 Division Ave S, Grand Rapids, MI 49507, USA", lat: 42.9277517, lng: -85.6670059 },
+{ name: "ANARCHY CLOTHING", address: "1247 Maple Ave #1249, Los Angeles, CA 90015, USA", lat: 34.034801, lng: -118.257244 },
+{ name: "ANA'S HATS", address: "2111 S Eastman Rd, Longview, TX 75602, USA", lat: 32.469022, lng: -94.7079679 },
+{ name: "ANGELITO'S BOOTS", address: "863 Elizabeth Ave, Elizabeth, NJ 07201, USA", lat: 40.65978, lng: -74.2042857 },
+{ name: "ANTONINI USA #412A", address: "Columbus, Mansfield, NJ 08022, USA", lat: 40.0727889, lng: -74.7206894 },
+{ name: "ANYDAY OUTFITTERS", address: "2053 Colonial Ave, Roanoke, VA 24015, USA", lat: 37.2557297, lng: -79.9565603 },
+{ name: "APPAREL HOUSE", address: "409 Smithfield St, Pittsburgh, PA 15222, USA", lat: 40.4390199, lng: -79.9995595 },
+{ name: "ARACELY'S ENTERPRISES", address: "Jerome, ID 83338, USA", lat: 42.7240732, lng: -114.5186534 },
+{ name: "ARAMBULA IMPORTS INC.", address: "1760 California Ave ste 110, Corona, CA 92881, USA", lat: 33.8584166, lng: -117.5397243 },
+{ name: "ARIZONA SADDLERY", address: "315 S Main St, Rochester, MI 48307, USA", lat: 42.6799139, lng: -83.1341274 },
+{ name: "ARMANDO'S WESTERN WEAR", address: "812 Main St, Woodland, CA 95695, USA", lat: 38.6772991, lng: -121.7701356 },
+{ name: "ARTESANIAS TONALA", address: "529 Broadway, Vallejo, CA 94590, USA", lat: 38.1118011, lng: -122.2488723 },
+{ name: "AS WESTERN WEAR", address: "2338 Webb Girth Rd, Gainesville, GA 30507, USA", lat: 34.2221357, lng: -83.8055126 },
+{ name: "ASHER'S CLOTHING & SHOE CO.", address: "Kingshighway Blvd, St. Louis, MO 63115, USA", lat: 38.6811684, lng: -90.2482953 },
+{ name: "ATLANTIS HATS", address: "617 W Lexington St Ste H, Baltimore, MD 21201, USA", lat: 39.2911809, lng: -76.624981 },
+{ name: "AVE BOOTS", address: "4902 Creek Bend Dr, Austin, TX 78744, USA", lat: 30.1836167, lng: -97.7481239 },
+{ name: "AVON BOOT SHOP INC.", address: "38450 Chester Rd, Avon, OH 44011, USA", lat: 41.4676711, lng: -82.0529436 },
+{ name: "AYALA'S TODO EN PIEL", address: "393 Wilkerson Ave a, Perris, CA 92570, USA", lat: 33.7832281, lng: -117.2187754 },
+{ name: "AZABACHE BOOTS", address: "4439 W Grand Ave, Chicago, IL 60639, USA", lat: 41.9103669, lng: -87.7375382 },
+{ name: "AZTECA INDOOR BAZAR LLC", address: "3952 W 3500 S, West Valley City, UT 84120, USA", lat: 40.6966043, lng: -111.9854408 },
+{ name: "AZTECA MEXICO LEATHER GOODS", address: "28905 S Dixie Hwy, Homestead, FL 33033, USA", lat: 25.4976819, lng: -80.4468496 },
+{ name: "AZTECA WESTERN WEAR CORP.", address: "222 E 116th St, New York, NY 10029, USA", lat: 40.7973438, lng: -73.9392114 },
+{ name: "AZTECAS VIDEO", address: "324 Walnut St, Chico, CA 95928, USA", lat: 39.7227734, lng: -121.8488696 },
+{ name: "BARDEE BOOTS", address: "15224 Dixie Hwy b, Harvey, IL 60426, USA", lat: 41.6124229, lng: -87.6721187 },
+{ name: "BARKSDALE BOOT", address: "407 Barksdale Blvd, Bossier City, LA 71111, USA", lat: 32.5158306, lng: -93.7344526 },
+{ name: "BARQUERO'S SHOE STORE", address: "710 S San Jacinto Ave, San Jacinto, CA 92583, USA", lat: 33.7797748, lng: -116.9594404 },
+{ name: "BARRALES FASHION", address: "1900 W Huntsville Ave c, Springdale, AR 72762, USA", lat: 36.1896323, lng: -94.1550213 },
+{ name: "BASEM A. QAQI", address: "719 Erik Lake Rd, Brandon, FL 33510, USA", lat: 27.9505113, lng: -82.3152329 },
+{ name: "BASULTO FAMILY SHOES", address: "8946 San Juan Ave, South Gate, CA 90280, USA", lat: 33.9523982, lng: -118.2014085 },
+{ name: "BAYO BOOTS", address: "1936 N Texas St, Fairfield, CA 94533, USA", lat: 38.2636776, lng: -122.0338888 },
+{ name: "BC CORRAL INC", address: "1121 Hartsell Ave, Lakeland, FL 33803, USA", lat: 28.0278815, lng: -81.9672993 },
+{ name: "BELLOWS LEATHER", address: "2360 Mendon Rd, Cumberland, RI 02864, USA", lat: 41.9578955, lng: -71.4434799 },
+{ name: "BESSERRO WESTERN BOOTS LLC", address: "205 E Casino Rd Suite B-6, Everett, WA 98208, USA", lat: 47.9227614, lng: -122.2302131 },
+{ name: "BETTER MENS WEAR", address: "4908 Southpoint Pkwy, Fredericksburg, VA 22407, USA", lat: 38.233158, lng: -77.5009918 },
+{ name: "BETTER MENS WEAR", address: "8200 Midlothian Tpke, Richmond, VA 23235, USA", lat: 37.4976162, lng: -77.5474773 },
+{ name: "BETTER MENS WEAR", address: "1646 Seminole Trail, Charlottesville, VA 22901, USA", lat: 38.0818026, lng: -78.4747948 },
+{ name: "BIG TIME", address: "96 River Oaks Center Dr # B32, Calumet City, IL 60409, USA", lat: 41.5982507, lng: -87.5548731 },
+{ name: "BILLY'S WESTERN WEAR", address: "1490 S Main St, Boerne, TX 78006, USA", lat: 29.7736341, lng: -98.7220343 },
+{ name: "BONITAS BOUTIQUE", address: "2711 W Western Ave, South Bend, IN 46619, USA", lat: 41.672241, lng: -86.2884087 },
+{ name: "BOOT BARN", address: "15345 Barranca Pkwy, Irvine, CA 92618, USA", lat: 33.6597314, lng: -117.7378871 },
+{ name: "BOOT BUNKHOUSE", address: "5126 E Pima St, Tucson, AZ 85712, USA", lat: 32.2432043, lng: -110.8831633 },
+{ name: "BOOT CONNECTION", address: "4275 W Layton Ave, Greenfield, WI 53221, USA", lat: 42.9590249, lng: -87.9679741 },
+{ name: "BOOT COUNTRY", address: "1179 US-50, Milford, OH 45150, USA", lat: 39.1432528, lng: -84.2426149 },
+{ name: "BOOT HUNTER", address: "609 Carson Dr, Bear, DE 19701, USA", lat: 39.6094297, lng: -75.6900154 },
+{ name: "BOOT JACK #1", address: "McAllen, TX 78505, USA", lat: 26.2, lng: -98.23 },
+{ name: "BOOT JACK #2", address: "1428 E Jackson Ave, McAllen, TX 78503, USA", lat: 26.1902615, lng: -98.2059806 },
+{ name: "BOOT JACK #3", address: "1900 Frontage Rd #77, Brownsville, TX 78521, USA", lat: 25.9425658, lng: -97.5015 },
+{ name: "BOOT JACK #4", address: "McAllen, TX 78505, USA", lat: 26.2, lng: -98.23 },
+{ name: "BOOT TOWN WESTERN WEAR", address: "5679 Stockton Blvd, Sacramento, CA 95824, USA", lat: 38.5234517, lng: -121.4412011 },
+{ name: "BOOT VIL", address: "8839 Seminole Trail, Ruckersville, VA 22968, USA", lat: 38.2320331, lng: -78.3711232 },
+{ name: "BOOTS & MORE", address: "1060 High St, Jackson, MS 39202, USA", lat: 32.3042352, lng: -90.172081 },
+{ name: "BOOTS PLUS", address: "Bowling Green, KY, USA", lat: 36.9685219, lng: -86.4808043 },
+{ name: "BOOTY BROTHERS WESTERN STORE # 2", address: "3470 Capuano Rd, Lumberton, NC 28358, USA", lat: 34.6421517, lng: -79.0148318 },
+{ name: "BOOTZILLA BOOTS & FURS", address: "14504 Richmond Ave, Posen, IL 60469, USA", lat: 41.6294029, lng: -87.6927073 },
+{ name: "BOTA LATINA", address: "5519 Hull Street Rd N, Richmond, VA 23224, USA", lat: 37.488148, lng: -77.4941898 },
+{ name: "BOTAS 2 POTRILLOS", address: "5006 W Commerce St, San Antonio, TX 78237, USA", lat: 29.4310233, lng: -98.5591062 },
+{ name: "BOTAS 3 HERMANAS", address: "1128 8th Ave W, Palmetto, FL 34221, USA", lat: 27.5229648, lng: -82.5727016 },
+{ name: "BOTAS BRONKO", address: "9765 Sierra Ave. b, Fontana, CA 92335, USA", lat: 34.0764586, lng: -117.4345773 },
+{ name: "BOTAS CHIHUAHUA", address: "2033 Airline Rd J9, Corpus Christi, TX 78412, USA", lat: 27.6928986, lng: -97.3643251 },
+{ name: "BOTAS EL BANDIDO", address: "2601 E Bell Rd #12, Phoenix, AZ 85032, USA", lat: 33.6399959, lng: -112.0258397 },
+{ name: "BOTAS EL CAMPESINO", address: "1936 Greeley Mall #26, Greeley, CO 80631, USA", lat: 40.3899314, lng: -104.711546 },
+{ name: "BOTAS EL CHINO", address: "146 Henderson Crossing Plaza, Hendersonville, NC 28792, USA", lat: 35.3321986, lng: -82.4475588 },
+{ name: "BOTAS EL CUADRAO", address: "517 E Trilby Rd LOT 5, Fort Collins, CO 80525, USA", lat: 40.4941592, lng: -105.0706514 },
+{ name: "BOTAS EL GUERRERENSE", address: "6815 W Fairview Ave, Boise, ID 83704, USA", lat: 43.618929, lng: -116.2667059 },
+{ name: "BOTAS EL JIBARO", address: "2746 E McDowell Rd, Phoenix, AZ 85008, USA", lat: 33.4661522, lng: -112.0217876 },
+{ name: "BOTAS EL MUDO", address: "16874 N Cave Creek Rd, Phoenix, AZ 85032, USA", lat: 33.6400386, lng: -112.0328493 },
+{ name: "BOTAS EL PISTOLERO PYP", address: "1911 E Gage Ave Suite E-110, Los Angeles, CA 90001, USA", lat: 33.9823172, lng: -118.2385196 },
+{ name: "BOTAS EL ZACATECANO", address: "842 S Central Ave, Lodi, CA 95240, USA", lat: 38.1234914, lng: -121.2648257 },
+{ name: "BOTAS EXOTICAS YINA'S", address: "2019 Mission Ave, Oceanside, CA 92058, USA", lat: 33.2044702, lng: -117.3620148 },
+{ name: "BOTAS JUAREZ WESTERN WEAR #1", address: "4231 S Central Ave, Phoenix, AZ 85040, USA", lat: 33.4072971, lng: -112.0727177 },
+{ name: "BOTAS LA MORENA", address: "14 Courtet Dr, Wharton, NJ 07885, USA", lat: 40.9440573, lng: -74.5782882 },
+{ name: "BOTAS LEON", address: "444 E Foothill Blvd ste b, Rialto, CA 92376, USA", lat: 34.1071796, lng: -117.3624514 },
+{ name: "BOTAS LOS POTRILLOS", address: "2763 S Staples St, Corpus Christi, TX 78404, USA", lat: 27.7603531, lng: -97.4028871 },
+{ name: "BOTAS LUCERO WESTERN WEAR", address: "1550 S Federal Blvd Unit E, Denver, CO 80219, USA", lat: 39.6885174, lng: -105.0244329 },
+{ name: "BOTAS MONTERREY", address: "21 W Blackwell St, Dover, NJ 07801, USA", lat: 40.8841776, lng: -74.5598038 },
+{ name: "BOTAS TRES HERMANOS ", address: "635 W Mission Ave, Escondido, CA 92025, USA", lat: 33.1251295, lng: -117.0944856 },
+{ name: "BOTAS Y BOTINES EL ORIENTAL", address: "1324 Cedar St, San Bernardino, CA 92404, USA", lat: 34.1239578, lng: -117.2679331 },
+{ name: "BOTINES CHARROS", address: "3623 W Shaw Ave, Fresno, CA 93711, USA", lat: 36.8068551, lng: -119.8587841 },
+{ name: "BRANDING TIME LLC", address: "230 Godwin Ave, Midland Park, NJ 07432, USA", lat: 40.9894621, lng: -74.1406836 },
+{ name: "BRANTANO", address: "2200 Eastridge Loop #2076, San Jose, CA 95122, USA", lat: 37.3256289, lng: -121.8139115 },
+{ name: "BRIDGES BOOT OUTLET", address: "5496 Co Rd 388, Cusseta, AL 36852, USA", lat: 32.7460387, lng: -85.2780761 },
+{ name: "BRITE CREATIONS INC.", address: "93 Forsyth St SW, Atlanta, GA 30303, USA", lat: 33.7521918, lng: -84.3942421 },
+{ name: "BRITO'S WESTERN WEAR", address: "911 Main St, Lovington, NM 88260, USA", lat: 32.9392668, lng: -103.3483732 },
+{ name: "BROADWAY COLLECTION", address: "1100 Town East Mall, Mesquite, TX 75150, USA", lat: 32.8074836, lng: -96.6246313 },
+{ name: "BRONCO WESTERN WEAR", address: "118 N Main St, Porterville, CA 93257, USA", lat: 36.0673597, lng: -119.0159242 },
+{ name: "BUFFALO UNITED MEN'S FASHIONS", address: "3082 Bailey Ave, Buffalo, NY 14215, USA", lat: 42.9388553, lng: -78.8139139 },
+{ name: "BYRD'S WESTERN STORE INC.", address: "4855 W New Haven Ave, West Melbourne, FL 32904, USA", lat: 28.0782281, lng: -80.7091498 },
+{ name: "CABALLERO CO #3", address: "515 W Lewis St, Pasco, WA 99301, USA", lat: 46.2306101, lng: -119.093222 },
+{ name: "CABALLO DE ORO WESTERN WEAR", address: "8280 Old Redwood Hwy, Cotati, CA 94931, USA", lat: 38.3245864, lng: -122.7042396 },
+{ name: "CABALLO DORADO WESTERN WEAR", address: "4166 Buford Hwy NE 1022 f2, Atlanta, GA 30345, USA", lat: 33.8637438, lng: -84.3080909 },
+{ name: "CALETA WESTERN WEAR LLC", address: "212 E Walworth Ave, Delavan, WI 53115, USA", lat: 42.6327739, lng: -88.6463963 },
+{ name: "CALZADO LEON", address: "443 Dutton Ave #4, Santa Rosa, CA 95407, USA", lat: 38.430998, lng: -122.72641 },
+{ name: "CALZAMUNDO ORIGINAL WESTERN WEAR", address: "4865 W 3500 S #1, West Valley City, UT 84120, USA", lat: 40.6960843, lng: -112.0067669 },
+{ name: "CAMPAU CLOTHING CO.", address: "9643 Joseph Campau Ave, Hamtramck, MI 48212, USA", lat: 42.3962551, lng: -83.0577624 },
+{ name: "CAMPOS BOOTS AND MORE", address: "4265 Augusta Rd n, Lexington, SC 29073, USA", lat: 33.9722564, lng: -81.1498819 },
+{ name: "CAN I SUIT U", address: "400 Fontainebleau, O'Fallon, IL 62269, USA", lat: 38.5963618, lng: -89.9063153 },
+{ name: "CANELO BOOTS", address: "1801 S Main St, Santa Ana, CA 92707, USA", lat: 33.7243185, lng: -117.8673893 },
+{ name: "CARDONA'S WESTERN WEAR", address: "1926 Elkhart Rd, Goshen, IN 46526, USA", lat: 41.5974376, lng: -85.8613422 },
+{ name: "CARMELA VENEGAS", address: "2024 N Katy Ave, Fresno, CA 93722, USA", lat: 36.765097, lng: -119.8748156 },
+{ name: "CARMELITAS MEXICAN STORE", address: "5041 Rainier Ave S, Seattle, WA 98118, USA", lat: 47.5559998, lng: -122.2845187 },
+{ name: "CARMELO GARIBALDI", address: "1412 Cavalry St, Detroit, MI 48209, USA", lat: 42.3126818, lng: -83.1026185 },
+{ name: "CARMEN CARI O", address: "1002 Ponder Ave, Sarasota, FL 34232, USA", lat: 27.3247239, lng: -82.4595492 },
+{ name: "CAROLINA WESTERN WEAR", address: "5015 Preston Hwy, Louisville, KY 40213, USA", lat: 38.1751548, lng: -85.7130305 },
+{ name: "CARRILLO WESTERN WEAR INC", address: "2621 Cherokee St, St. Louis, MO 63118, USA", lat: 38.593654, lng: -90.226398 },
+{ name: "CARROLLS BOOT COUNTRY", address: "1602 Capital Cir NW, Tallahassee, FL 32303, USA", lat: 30.4722338, lng: -84.3627074 },
+{ name: "CARTER'S CORNER", address: "Jonesboro, AR 72402, USA", lat: 35.8140463, lng: -90.6766634 },
+{ name: "CASA DE MODA LLC", address: "1928 S Commons 730 e012, Federal Way, WA 98003, USA", lat: 47.3133863, lng: -122.3096095 },
+{ name: "CASA DE ORO JEWELRY", address: "5540 Franklin Blvd, Sacramento, CA 95820, USA", lat: 38.5260459, lng: -121.4724305 },
+{ name: "CASA VASQUEZ", address: "509 N Washington St, Lexington, NE 68850, USA", lat: 40.7782196, lng: -99.7419205 },
+{ name: "CASANOVA RECORDS 1 LIMITED LIABILITY COMP", address: "City Ave, Atlantic City, NJ 08401, USA", lat: 39.3669823, lng: -74.427539 },
+{ name: "CASCABEL WESTERN WEAR", address: "1090 Southcenter Mall, Tukwila, WA 98188, USA", lat: 47.4579582, lng: -122.255588 },
+{ name: "CASTILLO'S BOUTIQUE", address: "7824 Monterey Rd, Gilroy, CA 95020, USA", lat: 37.0133051, lng: -121.5714479 },
+{ name: "CASUAL MENS", address: "106a Healdsburg Ave, Healdsburg, CA 95448, USA", lat: 38.6048682, lng: -122.8677172 },
+{ name: "CATTLEMAN WESTERN STORE", address: "2437 Hwy 35 Bypass, Alvin, TX 77512, USA", lat: 29.2042524, lng: -95.4201562 },
+{ name: "CECIL B.", address: "18900 Michigan Ave k309, Dearborn, MI 48126, USA", lat: 42.3153243, lng: -83.2224927 },
+{ name: "CELDI'S WESTERN WEAR", address: "Moultrie Plaza Shopping Center, 317 6th St SE, Moultrie, GA 31768, USA", lat: 31.1760315, lng: -83.7812403 },
+{ name: "CENTENARIO WESTERN CORP.", address: "645 H St Suite E, Chula Vista, CA 91910, USA", lat: 32.6308991, lng: -117.0912421 },
+{ name: "CENTRO DEL VAQUERO # 2", address: "Parking lot, 683 Peoria St, Aurora, CO 80011, USA", lat: 39.727236, lng: -104.8495121 },
+{ name: "CESAR GUTIERREZ", address: "2692 E 10 N Cir, St. George, UT 84790, USA", lat: 37.1083009, lng: -113.5284474 },
+{ name: "CHAMBERS SHINE PARLOR & SHOE REPAIR", address: "8474 S Central Ave, Los Angeles, CA 90001, USA", lat: 33.9612531, lng: -118.2562318 },
+{ name: "CHANGES COLLECTION", address: "7249 Crafford Pl, Fort Washington, MD 20744, USA", lat: 38.790754, lng: -76.9563282 },
+{ name: "CHAPARRAL BOOTS", address: "1511 Broadway, Scottsbluff, NE 69361, USA", lat: 41.8617601, lng: -103.6623363 },
+{ name: "CHAVEZ COWBOYS WEAR", address: "1310 E Lake Mead Blvd, North Las Vegas, NV 89030, USA", lat: 36.1966834, lng: -115.1248533 },
+{ name: "CHAVEZ WESTERN WEAR", address: "3161 Broadway Blvd n101, Garland, TX 75043, USA", lat: 32.8766127, lng: -96.6217868 },
+{ name: "CHESTER BOOTS SHOP", address: "28037 Gratiot Ave, Roseville, MI 48066, USA", lat: 42.5029545, lng: -82.9335595 },
+{ name: "CHUCK'S BOOTS", address: "300 Biltmore Dr #220b, Fenton, MO 63026, USA", lat: 38.4989819, lng: -90.4620355 },
+{ name: "CIOCCA'S LEATHER IMPORTS", address: "12531 Vintner Dr, Rancho Cucamonga, CA 91739, USA", lat: 34.1186261, lng: -117.531883 },
+{ name: "CIRCLE M WESTERN WEAR", address: "4418 Columbus Rd, Macon, GA 31206, USA", lat: 32.8249265, lng: -83.713419 },
+{ name: "CITY SLICKER SHOES", address: "300 Monroe St, Detroit, MI 48226, USA", lat: 42.3339381, lng: -83.0442634 },
+{ name: "CITY WAREHOUSE INC.", address: "Parking lot, 22755 Greenfield Rd, Southfield, MI 48075, USA", lat: 42.4582831, lng: -83.2020314 },
+{ name: "CLIP-ITY CLOP WESTERN WEAR", address: "12930 Chippewa Rd #7, Brecksville, OH 44141, USA", lat: 41.3217512, lng: -81.5932655 },
+{ name: "CLOTHES LOVERS BOUTIQUE", address: "3019 Wheaton Ave, St. Louis, MO 63114, USA", lat: 38.7077003, lng: -90.3312246 },
+{ name: "COLT BOOTS AND WESTERN WEAR", address: "250 N State St Suite A, Hemet, CA 92543, USA", lat: 33.7506314, lng: -116.9713298 },
+{ name: "COMERCIAL CUEVAS", address: "55 W Main St, Apopka, FL 32703, USA", lat: 28.6737406, lng: -81.5130071 },
+{ name: "COMPUTERIZED COBBLER", address: "200 Via Rancho Pkwy #493, Escondido, CA 92025, USA", lat: 33.0716663, lng: -117.0668238 },
+{ name: "CONTEMPO FASHIONS INC", address: "1112 Main St, Bridgeport, CT 06604, USA", lat: 41.1796976, lng: -73.1893504 },
+{ name: "CONTRERAS WESTERN WEAR", address: "3266 Lantern Ct, San Jose, CA 95111, USA", lat: 37.2938262, lng: -121.8286156 },
+{ name: "CORDOVA'S BRIDAL LLC.", address: "455 W Silver Star Rd, Ocoee, FL 34761, USA", lat: 28.5744307, lng: -81.5518077 },
+{ name: "COUGAR ITALIAN FASHION INC.", address: "96 Orchard St, New York, NY 10002, USA", lat: 40.7184599, lng: -73.9898431 },
+{ name: "COUNTRY GENERAL STORE", address: "6279 Van Nuys Blvd, Van Nuys, CA 91401, USA", lat: 34.1845087, lng: -118.44907 },
+{ name: "COUNTRY RODEO SHOP LLC", address: "4830 E Mt Houston Rd, Houston, TX 77093, USA", lat: 29.8906788, lng: -95.3197878 },
+{ name: "COUTURE C", address: "21745 Kelly Rd, Eastpointe, MI 48021, USA", lat: 42.4583881, lng: -82.9339128 },
+{ name: "COWBOY BOOTS & WESTERN WEAR CORP", address: "170 N Mt Vernon Ave, San Bernardino, CA 92410, USA", lat: 34.1021769, lng: -117.3141473 },
+{ name: "COWBOY CONNECTION", address: "3218 Boiling Springs Rd, Boiling Springs, SC 29316, USA", lat: 35.0410042, lng: -81.9756864 },
+{ name: "COWBOY DISTRIBUTERS INC.", address: "9620 Grant Ave, Manassas, VA 20110, USA", lat: 38.7457599, lng: -77.475134 },
+{ name: "COWBOY SHOE REPAIR", address: "8810 Airline Dr, Houston, TX 77037, USA", lat: 29.8875844, lng: -95.3933692 },
+{ name: "COWTOWN COWBOY OUTFITTERS", address: "761 US-40, Pilesgrove, NJ 08098, USA", lat: 39.6632446, lng: -75.3769827 },
+{ name: "CRAIG BURNS", address: "14548 Joy Rd, Detroit, MI 48228, USA", lat: 42.3586642, lng: -83.1869637 },
+{ name: "CRAZY SHOES", address: "100 N Gateway Dr, Madera, CA 93637, USA", lat: 36.96128, lng: -120.0611523 },
+{ name: "CREACIONES VEVI'S", address: "5446 Sun Valley Blvd, Sun Valley, NV 89433, USA", lat: 39.5913635, lng: -119.7796302 },
+{ name: "CROCODILE WORLD", address: "7092 Hodgson Memorial Dr, Savannah, GA 31406, USA", lat: 32.0089801, lng: -81.1086391 },
+{ name: "CRYSTINA FASHION & BRIDAL LLC", address: "14215 E 21st St, Tulsa, OK 74134, USA", lat: 36.1336266, lng: -95.8183684 },
+{ name: "CUERNOS CHUECOS WESTERN WEAR LLC", address: "6722 Penn Ave S, Richfield, MN 55423, USA", lat: 44.8808639, lng: -93.3089594 },
+{ name: "CUEVAS WESTERN WEAR", address: "9433 Kempwood Dr Suite D, Houston, TX 77080, USA", lat: 29.8210408, lng: -95.5247091 },
+{ name: "CULTURED COWBOY", address: "1521 Bypass 25 NE, Greenwood, SC 29649, USA", lat: 34.2154279, lng: -82.1565102 },
+{ name: "D & D OUTFITTERS", address: "500 Mall Road &, I-64, Barboursville, WV 25504, USA", lat: 38.4221046, lng: -82.2665104 },
+{ name: "D C WESTERN WEAR # 2", address: "1200 Towne Centre Blvd #1050, Provo, UT 84601, USA", lat: 40.2176178, lng: -111.6634552 },
+{ name: "DACODEST COLLECTION # 2", address: "21700 Greenfield Rd ll3, Oak Park, MI 48237, USA", lat: 42.4530756, lng: -83.199897 },
+{ name: "DAN BROTHERS", address: "1032 S Charles St, Baltimore, MD 21230, USA", lat: 39.2770784, lng: -76.6146225 },
+{ name: "DANDY'S WESTERN WEAR", address: "Sweetwater, TX 79556, USA", lat: 32.4709519, lng: -100.4059384 },
+{ name: "DANNIA'S FASHION", address: "1428 Overland Ave, Burley, ID 83318, USA", lat: 42.5347874, lng: -113.7936817 },
+{ name: "DAVID'S SHOE REPAIR", address: "722 Sebastopol Rd, Santa Rosa, CA 95407, USA", lat: 38.4296648, lng: -122.7282551 },
+{ name: "DE FIESTA BOUTIQUE", address: "3305 Lorna Rd #10, Hoover, AL 35216, USA", lat: 33.3937941, lng: -86.7966505 },
+{ name: "DEANNA'S FURNITURE", address: "517 W Bardsley Ave, Tulare, CA 93274, USA", lat: 36.1954107, lng: -119.3526108 },
+{ name: "DEL CARMEN MEXICAN STORE", address: "14415 7th St, Dade City, FL 33523, USA", lat: 28.3675433, lng: -82.1893439 },
+{ name: "DEL PRIMO WESTERN WEAR", address: "1200 S Robert St, St Paul, MN 55118, USA", lat: 44.9096779, lng: -93.0799271 },
+{ name: "DEL SOL WESTERN WEAR", address: "8280 Folsom Blvd ste g, Sacramento, CA 95826, USA", lat: 38.5472838, lng: -121.4018617 },
+{ name: "DELLA COUTURE", address: "107 E Charleston Blvd UNIT 135, Las Vegas, NV 89104, USA", lat: 36.1590115, lng: -115.1527704 },
+{ name: "DENIM DEN", address: "710 Canal St, New Orleans, LA 70130, USA", lat: 29.9530714, lng: -90.069668 },
+{ name: "DENIM HEAVEN CO.", address: "7850 Melrose Ave, Los Angeles, CA 90046, USA", lat: 34.0819676, lng: -118.3602636 },
+{ name: "DEPORTES GARCIA", address: "307 E Jefferson Blvd, Los Angeles, CA 90011, USA", lat: 34.0173042, lng: -118.2689246 },
+{ name: "DEPORTES JANITZIO", address: "10363 Folsom Blvd, Rancho Cordova, CA 95670, USA", lat: 38.589165, lng: -121.3055986 },
+{ name: "DEPORTES RULAS", address: "1864 Beach St, Oceano, CA 93445, USA", lat: 35.09907, lng: -120.6110775 },
+{ name: "DESPERADO FASHIONS", address: "107 Partridge Ct SW, Poplar Grove, IL 61065, USA", lat: 42.3543094, lng: -88.88072 },
+{ name: "D'FIESTA BOOTS AND GOWNS", address: "5995 Forest Lakes Cove, Sterrett, AL 35147, USA", lat: 33.3639157, lng: -86.6375833 },
+{ name: "DIAMANTE CHARRO", address: "161 Harder Rd, Hayward, CA 94544, USA", lat: 37.6489733, lng: -122.0753727 },
+{ name: "DIAMANTE WESTERN WEAR", address: "40 S White Rd, San Jose, CA 95127, USA", lat: 37.3653222, lng: -121.8272445 },
+{ name: "DIAMOND WESTERN WEAR #1", address: "181 E 2nd St, Chico, CA 95928, USA", lat: 39.7305627, lng: -121.8395446 },
+{ name: "DIANE'S SHOE & LEATHER GOODS", address: "1718 Fourth St, San Fernando, CA 91340, USA", lat: 34.2909131, lng: -118.4419382 },
+{ name: "DIAZ MENS WEAR & WESTERN WEAR", address: "70 E Santa Clara St, San Jose, CA 95113, USA", lat: 37.336717, lng: -121.8890761 },
+{ name: "DIPLOMAT CLUB", address: "1210 E Grand St, Elizabeth, NJ 07201, USA", lat: 40.6661856, lng: -74.2143328 },
+{ name: "DIRECTIONS", address: "35 S 69th St, Upper Darby Township, PA 19082, USA", lat: 39.9606382, lng: -75.2585521 },
+{ name: "DISCOTECA SANCHEZ", address: "7309 Cameron Rd #101, Austin, TX 78752, USA", lat: 30.3282517, lng: -97.6903269 },
+{ name: "DISCOTECA DO A LETY", address: "2821 Middlefield Rd, Redwood City, CA 94063, USA", lat: 37.4761341, lng: -122.2098106 },
+{ name: "DISCOTECA MIRAMAR", address: "500 Spring St, Paso Robles, CA 93446, USA", lat: 35.6194505, lng: -120.6903531 },
+{ name: "DISCOTECA NUEVO MUNDO", address: "1165 Manning Ave, Reedley, CA 93654, USA", lat: 36.6030426, lng: -119.4368591 },
+{ name: "DISCOTECA RODEO", address: "105 W 11th St, Georgetown, TX 78626, USA", lat: 30.6342332, lng: -97.6772988 },
+{ name: "DISCOTECA Y ZAPATERIA SINALOA", address: "Central Plaza Shopping Center, 130 W La Habra Blvd, La Habra, CA 90631, USA", lat: 33.9315682, lng: -117.9466826 },
+{ name: "DOLCE VIRA", address: "122 Orchard St, New York, NY 10002, USA", lat: 40.7195328, lng: -73.989424 },
+{ name: "DOMENICO'S FORMAL WEAR", address: "7153 Frankford Ave, Philadelphia, PA 19135, USA", lat: 40.035638, lng: -75.0425469 },
+{ name: "DOS AMIGOS CLOTHING LLC", address: "1930 S Garnett Rd, Tulsa, OK 74128, USA", lat: 36.1343632, lng: -95.8522817 },
+{ name: "DOUBLE J WESTERN STORE", address: "1472 Riverdale St c, West Springfield, MA 01089, USA", lat: 42.1439311, lng: -72.6292518 },
+{ name: "D'RAYAS", address: "7263 Alondra Blvd, Paramount, CA 90723, USA", lat: 33.889591, lng: -118.1709165 },
+{ name: "DUBOSE'S SHOES & CLOTHING", address: "22445 Shawnee Ln, Athens, AL 35613, USA", lat: 34.7731914, lng: -86.9224802 },
+{ name: "DUDE'S BOUTIQUE", address: "646 South St, Philadelphia, PA 19147, USA", lat: 39.9420355, lng: -75.1536602 },
+{ name: "DURANGO BOOTS LLC", address: "1130 S Provence St, Olathe, KS 66061, USA", lat: 38.8658115, lng: -94.8391853 },
+{ name: "DURANGO SHOES", address: "2720 7 Mile Rd, Caledonia, WI 53108, USA", lat: 42.830184, lng: -87.9564195 },
+{ name: "DURANGO WESTERN WEAR", address: "6100 Watt Ave, North Highlands, CA 95660, USA", lat: 38.6773068, lng: -121.3821105 },
+{ name: "ECLIPSE WESTERN STORE INC.", address: "5843 Winchester Rd, Memphis, TN 38115, USA", lat: 35.0496293, lng: -89.8685989 },
+{ name: "EDDIES MENS SHOP", address: "212 S Cameron St, Harrisburg, PA 17101, USA", lat: 40.2609786, lng: -76.8727393 },
+{ name: "EDGE WEARS LLC.", address: "15140 Garfield Ave a, Paramount, CA 90723, USA", lat: 33.8950008, lng: -118.1685349 },
+{ name: "EDUARDO ZAMORA", address: "10880 Cedar Ave, Bloomington, CA 92316, USA", lat: 34.0564166, lng: -117.397027 },
+{ name: "EDUARDOS DEPARTMENT STORE", address: "1033 E Alisal St c, Salinas, CA 93905, USA", lat: 36.6732794, lng: -121.626126 },
+{ name: "EEL ETC FASHIONS", address: "333 Beale St #104, Memphis, TN 38103, USA", lat: 35.1392774, lng: -90.0501003 },
+{ name: "EL 7 LEGUAS WESTERN WEAR", address: "7139 Vernor W, Detroit, MI 48209, USA", lat: 42.3139668, lng: -83.1206224 },
+{ name: "EL ALAZAN WESTERN WEAR", address: "2625 Ashley Phosphate Rd, Charleston, SC 29418, USA", lat: 32.9330979, lng: -80.0530557 },
+{ name: "EL AMIGASO WESTERN WEAR # 2", address: "5410 Stockton Blvd, Sacramento, CA 95820, USA", lat: 38.5256623, lng: -121.4441516 },
+{ name: "EL AMIGAZO BOOTS", address: "11115 Main St a, Lamont, CA 93241, USA", lat: 35.2536358, lng: -118.9141128 },
+{ name: "EL ATRANCON WESTERN WEAR", address: "6200 N State St, Ukiah, CA 95482, USA", lat: 39.2339528, lng: -123.2027668 },
+{ name: "EL BRONCO", address: "6166 15th St E, Bradenton, FL 34203, USA", lat: 27.4313495, lng: -82.5476872 },
+{ name: "EL BRONCO", address: "8012 S Tacoma Way # 57, Lakewood, WA 98499, USA", lat: 47.1839246, lng: -122.4852201 },
+{ name: "EL BRONCO MEXICAN STORE", address: "201 SW 6th St, Pompano Beach, FL 33060, USA", lat: 26.2223381, lng: -80.1261446 },
+{ name: "EL BRONCO WESTERN WEAR", address: "5800 N Sharon Amity Rd, Charlotte, NC 28215, USA", lat: 35.2350983, lng: -80.7376602 },
+{ name: "EL CAMELLO WESTERN WEAR", address: "Parking lot, 660 Peoria St, Aurora, CO 80011, USA", lat: 39.7266451, lng: -104.8451427 },
+{ name: "EL CAMPESINOS #1", address: "1550 Mt Meigs Rd, Montgomery, AL 36107, USA", lat: 32.3747068, lng: -86.2871183 },
+{ name: "EL CANELO LTD", address: "4604 S Ashland Ave, Chicago, IL 60609, USA", lat: 41.810219, lng: -87.6652197 },
+{ name: "EL CAPORAL WESTERN WEAR", address: "805 E 1st St, Clovis, NM 88101, USA", lat: 34.3984, lng: -103.196076 },
+{ name: "EL CARRIL WESTERN WEAR", address: "546 S Academy Blvd, Colorado Springs, CO 80910, USA", lat: 38.824183, lng: -104.7581634 },
+{ name: "EL CATRIN WESTERN WEAR", address: "246 N New Hope Rd #154, Gastonia, NC 28054, USA", lat: 35.2650461, lng: -81.1467097 },
+{ name: "EL CENTAVITO", address: "4344 N Federal Blvd, Denver, CO 80211, USA", lat: 39.776203, lng: -105.0249353 },
+{ name: "EL CENTENARIO WESTERN WEAR", address: "2520 E Palmdale Blvd c2, Palmdale, CA 93550, USA", lat: 34.5790982, lng: -118.0833706 },
+{ name: "EL CERRITO WESTERN WEAR KIM LONG PLAZA #1", address: "4140 Jonesboro Rd Suite #A4, Forest Park, GA 30297, USA", lat: 33.6429666, lng: -84.3617874 },
+{ name: "EL CHARRITO WESTERN WEAR", address: "609 S Circle Dr #100, Colorado Springs, CO 80910, USA", lat: 38.8231559, lng: -104.7800747 },
+{ name: "EL CHARRO FAMOSO", address: "6429 Pacific Blvd, Huntington Park, CA 90255, USA", lat: 33.9808237, lng: -118.2255762 },
+{ name: "EL CHARRO WESTERN WEAR", address: "1333 Crows Landing Rd, Modesto, CA 95351, USA", lat: 37.6107415, lng: -120.9942348 },
+{ name: "EL COMPA WESTERN WEAR", address: "16204 Loch Katrine Ln, Houston, TX 77084, USA", lat: 29.8462699, lng: -95.6462752 },
+{ name: "EL COMPADRE WESTERN WEAR", address: "1171 S King Rd, San Jose, CA 95122, USA", lat: 37.3384461, lng: -121.8419537 },
+{ name: "EL CORRAL VAQUERO", address: "23 S Main St, Longmont, CO 80501, USA", lat: 40.1587388, lng: -105.1031013 },
+{ name: "EL CORRAL WESTERN BOOTS", address: "11117 Harry Hines Blvd, Dallas, TX 75229, USA", lat: 32.8872319, lng: -96.8887892 },
+{ name: "EL COWBOY BOOTS", address: "2520 E Palmdale Blvd f06, Palmdale, CA 93550, USA", lat: 34.5790982, lng: -118.0833706 },
+{ name: "EL DIAMANTE", address: "9501 State Ave H, Marysville, WA 98270, USA", lat: 48.0817923, lng: -122.1731441 },
+{ name: "EL DORADO FASHION", address: "333 N State St, Orem, UT 84057, USA", lat: 40.3023862, lng: -111.699114 },
+{ name: "EL DORADO WESTERN WEAR", address: "4200 South Fwy Ste. 1003, Fort Worth, TX 76115, USA", lat: 32.6857625, lng: -97.3251149 },
+{ name: "EL DURANGUENSE WESTERN WEAR INC.", address: "1806 Walkup Ave, Monroe, NC 28110, USA", lat: 34.9869011, lng: -80.5217055 },
+{ name: "EL EFECTIBO WESTERN WEAR", address: "1801 Planz Rd spc a, Bakersfield, CA 93304, USA", lat: 35.3244428, lng: -119.0229711 },
+{ name: "EL ELEGANTE", address: "Omak, WA, USA", lat: 48.4108635, lng: -119.5300609 },
+{ name: "EL FORASTERO", address: "4604 Bergenline Ave, Union City, NJ 07087, USA", lat: 40.780602, lng: -74.0226019 },
+{ name: "EL GALLITO LC", address: "2934 Settlement Dr, Madison, WI 53713, USA", lat: 43.0313162, lng: -89.37681 },
+{ name: "EL GALLO DE ORO 1", address: "308 S McLean Blvd bd7, Elgin, IL 60123, USA", lat: 42.0254882, lng: -88.3146676 },
+{ name: "EL GALLO MAS GALLO", address: "415 Atlanta Hwy, Gainesville, GA 30501, USA", lat: 34.2817627, lng: -83.8390947 },
+{ name: "EL GALLO VAQUERO WESTERN WEAR INC", address: "2704 W Avery St #4, Pensacola, FL 32505, USA", lat: 30.4317976, lng: -87.2479244 },
+{ name: "EL HERRADERO WESTERN WEAR", address: "3249 50th St, Lubbock, TX 79413, USA", lat: 33.5474251, lng: -101.8866642 },
+{ name: "EL ITALIANO", address: "2105 Edison Hwy #117, Bakersfield, CA 93305, USA", lat: 35.3706726, lng: -118.9714219 },
+{ name: "EL JALISCENSE WESTERN WEAR", address: "618 N 2nd Ave, Dodge City, KS 67801, USA", lat: 37.7543149, lng: -100.0189346 },
+{ name: "EL LAGARTO", address: "127 SW 152nd St, Burien, WA 98166, USA", lat: 47.4665985, lng: -122.3351452 },
+{ name: "EL MAGO CLOTHING", address: "821 N Avalon Blvd, Wilmington, CA 90744, USA", lat: 33.7806294, lng: -118.262815 },
+{ name: "EL MEXICANO", address: "231 W Hueneme Rd, Oxnard, CA 93033, USA", lat: 34.1480412, lng: -119.1802671 },
+{ name: "EL NAYARITA", address: "7355 Lankershim Blvd a23, North Hollywood, CA 91605, USA", lat: 34.204171, lng: -118.3887423 },
+{ name: "EL NORTE O WESTERN WEAR", address: "417 E Lake St # 33, Minneapolis, MN 55408, USA", lat: 44.9481857, lng: -93.2694633 },
+{ name: "EL NORTE WESTERN WEAR", address: "422 Fulton St, Fremont, OH 43420, USA", lat: 41.3521783, lng: -83.1149576 },
+{ name: "EL NUEVO MEXICO", address: "2408 Federal St, Camden, NJ 08105, USA", lat: 39.9457468, lng: -75.090092 },
+{ name: "EL NUEVO RANCHO GRANDE", address: "1539 Alum Rock Ave, San Jose, CA 95116, USA", lat: 37.3508268, lng: -121.8602861 },
+{ name: "EL PARRANDERO ELEGANTE", address: "32270 Rancho Vista Dr suite A, Cathedral City, CA 92234, USA", lat: 33.8136398, lng: -116.4589913 },
+{ name: "EL PASO WESTERN GEAR #1", address: "16459 Appleton Ave, Menomonee Falls, WI 53051, USA", lat: 43.1755392, lng: -88.1145614 },
+{ name: "EL PATRON", address: "932 Fulton St, Fresno, CA 93721, USA", lat: 36.7335935, lng: -119.7893055 },
+{ name: "EL PATRON", address: "7355 Lankershim Blvd #67, North Hollywood, CA 91605, USA", lat: 34.204171, lng: -118.3887423 },
+{ name: "EL PATRON VIDEO", address: "817 Santa Fe Dr, Denver, CO 80204, USA", lat: 39.7293209, lng: -104.99883 },
+{ name: "EL PEPIRO", address: "2965 S 7th St a, Milwaukee, WI 53215, USA", lat: 42.9904834, lng: -87.9205188 },
+{ name: "EL PITIADO", address: "435 14th Ave, Greeley, CO 80631, USA", lat: 40.4287254, lng: -104.7019175 },
+{ name: "EL PORVENIR WESTERN WEAR", address: "1150 E William St, San Jose, CA 95116, USA", lat: 37.340959, lng: -121.8624333 },
+{ name: "EL POTOCINO WESTERN WEAR", address: "626 E Alisal St a2, Salinas, CA 93905, USA", lat: 36.673147, lng: -121.6344861 },
+{ name: "EL POTRERITO", address: "13197 Gladstone Ave c, Sylmar, CA 91342, USA", lat: 34.3104639, lng: -118.4282215 },
+{ name: "EL POTRERO", address: "11788 Sun Rd, Stockton, CA 95215, USA", lat: 37.9905742, lng: -121.1638381 },
+{ name: "EL POTRERO ROPA VAQUERO", address: "3766 Ridgeway Rd, Memphis, TN 38115, USA", lat: 35.0470274, lng: -89.8559503 },
+{ name: "EL POTRERO WESTERN WEAR", address: "3036 Eastway Dr, Charlotte, NC 28205, USA", lat: 35.214622, lng: -80.781951 },
+{ name: "EL POTRILLO WESTERN WEAR", address: "52565 Harrison St STE 107, Coachella, CA 92236, USA", lat: 33.666761, lng: -116.1822153 },
+{ name: "EL POTRO NORTE O", address: "821 Somerset St, Somerset, NJ 08873, USA", lat: 40.4829648, lng: -74.4808686 },
+{ name: "EL POTRO WESTERN WEAR", address: "228 S Wenatchee Ave, Wenatchee, WA 98801, USA", lat: 47.4212995, lng: -120.309061 },
+{ name: "EL PRIMO BOOTS", address: "102 4th Ave S, Algona, WA 98001, USA", lat: 47.275112, lng: -122.2559349 },
+{ name: "EL PRIMO CLOTHING INC.", address: "6535 Pacific Blvd, Huntington Park, CA 90255, USA", lat: 33.9796066, lng: -118.2256388 },
+{ name: "EL PRIMO WESTERN WEAR", address: "400 N 23rd St, Waco, TX 76707, USA", lat: 31.54456, lng: -97.1516392 },
+{ name: "EL RANCHERO WESTERN WEAR", address: "395 S King Rd # A, San Jose, CA 95116, USA", lat: 37.3456042, lng: -121.8489889 },
+{ name: "EL RANCHITO", address: "151 Boone Sq St, Hillsborough, NC 27278, USA", lat: 36.062414, lng: -79.099957 },
+{ name: "EL RANCHO BOOTS LLC", address: "3250 Gateway Blvd #254, Prescott, AZ 86303, USA", lat: 34.5479545, lng: -112.4099731 },
+{ name: "EL RANCHO FASHION", address: "4501 S Alameda St #6667, Los Angeles, CA 90058, USA", lat: 34.0022369, lng: -118.2413326 },
+{ name: "EL RANCHO GRANDE BOOTS", address: "4 Sarah Ct, Simpsonville, SC 29680, USA", lat: 34.6897712, lng: -82.308048 },
+{ name: "EL RANCHO WESTERN WEAR", address: "2737 Lake Vista Dr NE, Buford, GA 30519, USA", lat: 34.0771146, lng: -83.9312569 },
+{ name: "EL RATON VAQUERO", address: "1044 SW 29th St, Oklahoma City, OK 73109, USA", lat: 35.4350361, lng: -97.5346299 },
+{ name: "EL REPARO BOOTS", address: "1506 N Main St, Salinas, CA 93906, USA", lat: 36.7113104, lng: -121.6520131 },
+{ name: "EL REY BOOTS", address: "3490 W Alameda Ave, Denver, CO 80219, USA", lat: 39.7106781, lng: -105.0344275 },
+{ name: "EL REY DEL BAJIO", address: "1116 S Thornton Ave d, Dalton, GA 30720, USA", lat: 34.754993, lng: -84.9694473 },
+{ name: "EL REY WESTERN WEAR", address: "117 E 22nd St #1, Greeley, CO 80631, USA", lat: 40.4034682, lng: -104.6774001 },
+{ name: "EL RINCON LATINO", address: "34 New Leicester Hwy, Asheville, NC 28806, USA", lat: 35.5888746, lng: -82.5988204 },
+{ name: "EL RIO WESTERN WEAR", address: "3421 Memorial Dr, Waco, TX 76711, USA", lat: 31.5252767, lng: -97.1503542 },
+{ name: "EL RODEO", address: "3302 N Blackstone Ave #165, Fresno, CA 93726, USA", lat: 36.781042, lng: -119.7893324 },
+{ name: "EL RODEO", address: "1753 Alexandria Dr, Lexington, KY 40504, USA", lat: 38.039019, lng: -84.553352 },
+{ name: "EL RODEO BOOTS", address: "2505 S Roberts St, Amarillo, TX 79103, USA", lat: 35.1866726, lng: -101.8216856 },
+{ name: "EL RODEO MENS WEAR", address: "3100 Alum Rock Ave, San Jose, CA 95127, USA", lat: 37.3657253, lng: -121.8276758 },
+{ name: "EL RODEO WESTERN WEAR INC.", address: "14500 W Colfax Ave Unit 306, Lakewood, CO 80401, USA", lat: 39.7332093, lng: -105.1568334 },
+{ name: "EL RODEO.COM INC.", address: "618 S State Rd 7, Margate, FL 33068, USA", lat: 26.2231563, lng: -80.2043172 },
+{ name: "EL SEMENTAL WESTERN WEAR", address: "6570 Tara Blvd b, Jonesboro, GA 30236, USA", lat: 33.5747529, lng: -84.3704615 },
+{ name: "EL SENOR BOOTS LLC", address: "731 Georgesville Rd, Columbus, OH 43228, USA", lat: 39.9381186, lng: -83.1134904 },
+{ name: "EL SI HAY MISCELANEA INC", address: "8045 Federal Blvd, Westminster, CO 80031, USA", lat: 39.8428269, lng: -105.0253416 },
+{ name: "EL SOMBRERO DORADO", address: "1238 Bridge St, Yuba City, CA 95991, USA", lat: 39.1321093, lng: -121.6330558 },
+{ name: "EL TAMESI", address: "4041 W 26th St, Chicago, IL 60623, USA", lat: 41.843994, lng: -87.726175 },
+{ name: "EL TAPATIO WESTERN WEAR", address: "1070 Almond Ave #9, Arbuckle, CA 95912, USA", lat: 39.0188204, lng: -122.069008 },
+{ name: "EL TEJANO ROPA VAQUERA # 1", address: "1017 N Cannon Blvd Unit C, Kannapolis, NC 28083, USA", lat: 35.5090266, lng: -80.6093569 },
+{ name: "EL TIANGUIS", address: "1230 S César E. Chávez Dr, Milwaukee, WI 53204, USA", lat: 43.018351, lng: -87.932695 },
+{ name: "EL TIRANO WESTERN WEAR", address: "200 W El Norte Pkwy #2, Escondido, CA 92026, USA", lat: 33.1398637, lng: -117.0917321 },
+{ name: "EL TORO WESTERN WEAR", address: "9100 Whittier Blvd, Pico Rivera, CA 90660, USA", lat: 33.9994826, lng: -118.0829133 },
+{ name: "EL VAQUERISIMO", address: "1114 Main St, Longmont, CO 80501, USA", lat: 40.1783979, lng: -105.1017995 },
+{ name: "EL VAQUERITO", address: "1115 N Grove Ave, Ontario, CA 91764, USA", lat: 34.078924, lng: -117.6290448 },
+{ name: "EL VAQUERO", address: "506 E 1st St, Santa Ana, CA 92701, USA", lat: 33.7451282, lng: -117.8631484 },
+{ name: "EL VAQUERO", address: "522 S Dumas Ave, Dumas, TX 79029, USA", lat: 35.8600851, lng: -101.9737278 },
+{ name: "EL VAQUERO #3", address: "120 E 4th St, Santa Ana, CA 92701, USA", lat: 33.7478154, lng: -117.8667392 },
+{ name: "EL VAQUERO #4", address: "201 W 4th St, Santa Ana, CA 92701, USA", lat: 33.748322, lng: -117.8689585 },
+{ name: "EL VAQUERO #2", address: "10721 Main St, El Monte, CA 91731, USA", lat: 34.0756253, lng: -118.0393296 },
+{ name: "EL VAQUERO BOOTS", address: "1200 SE 6th St, Topeka, KS 66607, USA", lat: 39.0481444, lng: -95.6587083 },
+{ name: "EL VAQUERO DE DURHAM LLC", address: "2801 N Roxboro St, Durham, NC 27704, USA", lat: 36.0267959, lng: -78.8901053 },
+{ name: "EL VAQUERO EXOTICO", address: "4501 S Alameda St Suite 704, Los Angeles, CA 90058, USA", lat: 34.0025436, lng: -118.2397793 },
+{ name: "EL VAQUERO GUERO", address: "989 E Main St, Santa Paula, CA 93060, USA", lat: 34.3540366, lng: -119.0601769 },
+{ name: "EL VAQUERO IMPORTS", address: "826 Minnesota Ave, Kansas City, KS 66101, USA", lat: 39.1158454, lng: -94.6310726 },
+{ name: "EL VAQUERO OAXAQUE O", address: "1338 Pleasant Hill St, Escondido, CA 92026, USA", lat: 33.1366977, lng: -117.1012229 },
+{ name: "EL VAQUERO VARIEDADES SPORT", address: "632 23rd St, Richmond, CA 94804, USA", lat: 37.9412028, lng: -122.3472512 },
+{ name: "EL VAQUERO WESTERN WEAR", address: "2451 Rockwood Ave, Calexico, CA 92231, USA", lat: 32.6947618, lng: -115.4976018 },
+{ name: "EL VIEJO ESTE LLC", address: "10364 Old Nashville Hwy suite 300, Smyrna, TN 37167, USA", lat: 35.9477028, lng: -86.5070963 },
+{ name: "EL VIEJON BOOTS INC.", address: "848 Central Ave, Kansas City, KS 66101, USA", lat: 39.1006823, lng: -94.6316778 },
+{ name: "EL WEST", address: "3167 Mt Pleasant St NW, Washington, DC 20010, USA", lat: 38.9307875, lng: -77.0379221 },
+{ name: "ELEGANTE WESTERN WEAR", address: "8383 W Main St, Marshall, VA 20115, USA", lat: 38.8642984, lng: -77.8583681 },
+{ name: "ELIA MIREYA GUZMAN NIEBLA", address: "9442 Artesia Blvd d, Bellflower, CA 90706, USA", lat: 33.8744733, lng: -118.1324714 },
+{ name: "ELITE FASHIONS", address: "19410 Haystream Dr, Katy, TX 77449, USA", lat: 29.8189608, lng: -95.7084049 },
+{ name: "ELIZABETH CAVILLO", address: "522 Centennial Rd, Grand Junction, CO 81504, USA", lat: 39.0809632, lng: -108.5002209 },
+{ name: "ELLAS UNIVERSAL LLC", address: "549 Shirland Ave, Beloit, WI 53511, USA", lat: 42.4964191, lng: -89.0461889 },
+{ name: "ENRIQUEZ WESTERN WEAR", address: "#11, 36601 Newark Blvd #11, Newark, CA 94560, USA", lat: 37.5392761, lng: -122.03479 },
+{ name: "ENVIOS & BOUTIQUE ROSITA LLC.", address: "4801 N Tryon St G, Charlotte, NC 28213, USA", lat: 35.25871, lng: -80.78598 },
+{ name: "ENVIOS JENY", address: "Parking lot, 10 S Havana St #116, Aurora, CO 80012, USA", lat: 39.7161591, lng: -104.8653401 },
+{ name: "ERRADURA DE ORO", address: "6719 W Thomas Rd #3, Phoenix, AZ 85033, USA", lat: 33.4792403, lng: -112.2057774 },
+{ name: "ESMERALDA JEWELRY & MUSIC", address: "72440 Ramon Rd b2, Thousand Palms, CA 92276, USA", lat: 33.8166543, lng: -116.3983085 },
+{ name: "ESMERALDA'S JEWELRY", address: "West San Carlos, San Jose, CA 95126, USA", lat: 37.3236215, lng: -121.9086904 },
+{ name: "ESPINOZA BOOT MAKER", address: "4409 N 16th St, Phoenix, AZ 85016, USA", lat: 33.5006196, lng: -112.0473188 },
+{ name: "ESPINOZA JEWELRY", address: "655 W Tennyson Rd, Hayward, CA 94544, USA", lat: 37.6326326, lng: -122.0683643 },
+{ name: "ESPINOZA'S WESTERN WEAR", address: "1000 Melody Ln #117, Roseville, CA 95678, USA", lat: 38.7283327, lng: -121.2919821 },
+{ name: "ESTILO ITALIANO #2", address: "1440 S Anaheim Blvd spc # h32, Anaheim, CA 92805, USA", lat: 33.8118256, lng: -117.9037213 },
+{ name: "EVA'S FASHION #2", address: "5200 W 25th St, Cicero, IL 60804, USA", lat: 41.8457864, lng: -87.7541387 },
+{ name: "EXECUTIVE MAN", address: "18900 Michigan Ave, Dearborn, MI 48126, USA", lat: 42.3153243, lng: -83.2224927 },
+{ name: "EXOTIC SKIN FOOTWEAR", address: "13116 Crestwood Bend Ln, Florissant, MO 63033, USA", lat: 38.8059873, lng: -90.2675628 },
+{ name: "EXPO MEXICO", address: "214 17th St, Santa Ana, CA 92706, USA", lat: 33.7598821, lng: -117.8656452 },
+{ name: "EXPRESS MONEY SERVICES INC.", address: "1110 N Santa Fe Ave Ste G, Vista, CA 92083, USA", lat: 33.2146333, lng: -117.2456471 },
+{ name: "F.M. LIGHT & SONS", address: "830 Lincoln Ave, Steamboat Springs, CO 80487, USA", lat: 40.486831, lng: -106.8351224 },
+{ name: "FACTORY FINISH", address: "4425 Schaefer Rd, Dearborn, MI 48126, USA", lat: 42.3206125, lng: -83.1762492 },
+{ name: "FAMILIA FIGUEROA", address: "207 S Oregon St, Ontario, OR 97914, USA", lat: 44.0247638, lng: -116.9639654 },
+{ name: "FARMERSVILLE WESTERN WEAR", address: "876 Farmersville Rd, Farmersville, CA 93223, USA", lat: 36.3048518, lng: -119.2067698 },
+{ name: "FASHION BOOTS RUTH", address: "4010 Alma Ave, Haines City, FL 33844, USA", lat: 28.1090686, lng: -81.6629956 },
+{ name: "FASHION LA JOYA INC", address: "1105 W Main St A, Santa Maria, CA 93458, USA", lat: 34.9536638, lng: -120.4517946 },
+{ name: "FASHION LATIN STORE", address: "1401 University Blvd E g28, Hyattsville, MD 20783, USA", lat: 38.9861234, lng: -76.9842592 },
+{ name: "FIESTA VIP", address: "1515 W Crawford St, Salina, KS 67401, USA", lat: 38.8269053, lng: -97.6296809 },
+{ name: "FIGUEROA'S JEWELRY", address: "1110 Broadway #104, El Cajon, CA 92021, USA", lat: 32.8082201, lng: -116.9440549 },
+{ name: "FLORES WESTERN WEAR", address: "803 Hudgins Ave, Fort Worth, TX 76111, USA", lat: 32.7744557, lng: -97.2980827 },
+{ name: "FOGGY DAZE", address: "2264 S Hamilton Rd, Columbus, OH 43232, USA", lat: 39.9285792, lng: -82.8786152 },
+{ name: "FOREVER FASHION", address: "300 W North Ave A, Villa Park, IL 60181, USA", lat: 41.9069791, lng: -87.9861057 },
+{ name: "FORSHOW", address: "13929 Northline Lake Dr, Houston, TX 77044, USA", lat: 29.972198, lng: -95.1579585 },
+{ name: "FRANCOS FASHION", address: "94-17 Roosevelt Ave, Jackson Heights, NY 11372, USA", lat: 40.7491096, lng: -73.8720972 },
+{ name: "FRANK BOOTS", address: "1107 Main St, Delano, CA 93215, USA", lat: 35.7706721, lng: -119.2463708 },
+{ name: "FROY ALTERATIONS & WESTERN WEAR", address: "17865 Monterey Rd suite H, Morgan Hill, CA 95037, USA", lat: 37.1342455, lng: -121.658589 },
+{ name: "G.Q. UNLIMITED LLC.", address: "728 W Broadway, Louisville, KY 40202, USA", lat: 38.2463116, lng: -85.7648633 },
+{ name: "GALERIA LEON", address: "1821 S 58th Ct, Cicero, IL 60804, USA", lat: 41.8553584, lng: -87.7698953 },
+{ name: "GALERIA MEXICANA", address: "436 Smith St, Perth Amboy, NJ 08861, USA", lat: 40.5125281, lng: -74.2813631 },
+{ name: "GALINDO'S FASHION", address: "2108 N Broadway St, Wichita, KS 67214, USA", lat: 37.7210138, lng: -97.3354584 },
+{ name: "GANADERIA LLC.", address: "3115 W 26th St f7, Chicago, IL 60623, USA", lat: 41.8442554, lng: -87.7033385 },
+{ name: "GARCIA'S LEATHER GOODS", address: "16208 Pioneer Blvd, Norwalk, CA 90650, USA", lat: 33.8841546, lng: -118.0820642 },
+{ name: "GARIBALDI WESTERN WEAR", address: "4498 Academy St, Dearborn Heights, MI 48125, USA", lat: 42.276852, lng: -83.2642757 },
+{ name: "GENESIS BOOTS Y MAS", address: "2901 W Washington Ave m113, Las Vegas, NV 89107, USA", lat: 36.1802208, lng: -115.1810463 },
+{ name: "GEORGIO", address: "Grand Prairie, TX 75052, USA", lat: 32.67942, lng: -97.0283383 },
+{ name: "GEORGIO #2", address: "Grand Prairie, TX 75052, USA", lat: 32.67942, lng: -97.0283383 },
+{ name: "GILES SHOES", address: "7407 E Riverside Dr, Ontario, CA 91761, USA", lat: 34.0191024, lng: -117.6434385 },
+{ name: "GISELLA'S WESTERN WEAR", address: "1330 Longmont Dr, San Antonio, TX 78245, USA", lat: 29.4208697, lng: -98.6766065 },
+{ name: "GISELLE'S BOUTIK", address: "4721 W 83rd St, Chicago, IL 60652, USA", lat: 41.741781, lng: -87.7393043 },
+{ name: "GISELLE'S FASHION", address: "420 N Greenwood Ave, Fort Smith, AR 72901, USA", lat: 35.3795979, lng: -94.4031321 },
+{ name: "GLORIA'S", address: "578 CO-133, Carbondale, CO 81623, USA", lat: 39.4075775, lng: -107.2205886 },
+{ name: "GO WEST BOUTIQUE", address: "4105 Sunrise Hwy, Bohemia, NY 11716, USA", lat: 40.749905, lng: -73.1350504 },
+{ name: "GOLDEN GATE", address: "12153 San Pablo Ave, Richmond, CA 94805, USA", lat: 37.9334588, lng: -122.3244524 },
+{ name: "GOMEZ WESTERN WEAR", address: "196 Uvalde Rd, Houston, TX 77015, USA", lat: 29.7982963, lng: -95.183322 },
+{ name: "GONZALEZ LEATHER", address: "1110 Torrey Hill Dr, Columbus, OH 43228, USA", lat: 39.931043, lng: -83.1047649 },
+{ name: "GORDON'S WESTERN WEAR", address: "446 S Oxnard Blvd, Oxnard, CA 93030, USA", lat: 34.198163, lng: -119.1771042 },
+{ name: "GRAN RODEO LLC", address: "337 Grand Ave, New Haven, CT 06513, USA", lat: 41.308782, lng: -72.9008604 },
+{ name: "GRAND COUNTRY INC", address: "1945 W 76 Country Blvd, Branson, MO 65616, USA", lat: 36.6426077, lng: -93.2564768 },
+{ name: "GRAND SHOE SERVICE", address: "124 Brentwood Dr, South San Francisco, CA 94080, USA", lat: 37.6415212, lng: -122.4258101 },
+{ name: "GUADALAJARA WESTERN WEAR", address: "5301 Power Inn Rd #130, Sacramento, CA 95820, USA", lat: 38.5266664, lng: -121.4086515 },
+{ name: "GUERA'S WESTERN WEAR", address: "1401 CA-46 Suite C, Wasco, CA 93280, USA", lat: 35.6012244, lng: -119.3409102 },
+{ name: "GUERRERO ORIGINAL W.W", address: "3806 Crescent St, Long Island City, NY 11101, USA", lat: 40.7508919, lng: -73.9406482 },
+{ name: "GUYS \"N\" DOLLS", address: "1845 Prater Way # M, Sparks, NV 89431, USA", lat: 39.5367535, lng: -119.768459 },
+{ name: "HACIENDA WESTERN WEAR", address: "2669 Saviers Rd, Oxnard, CA 93033, USA", lat: 34.1751558, lng: -119.1777785 },
+{ name: "HALF RIVER BOOTS LLC", address: "502 N Main St, Ellsworth, IL 61737, USA", lat: 40.4521129, lng: -88.7170857 },
+{ name: "HANDLEY'S WESTERN STORE", address: "314 E Bidwell St, Folsom, CA 95630, USA", lat: 38.6744196, lng: -121.1676831 },
+{ name: "HARRIS ENTERPRISES", address: "11525 Rock Hampton Dr, St. Louis, MO 63138, USA", lat: 38.7798875, lng: -90.2296975 },
+{ name: "HASSAN'S WESTERN WEAR", address: "100 N Sacramento St, Lodi, CA 95240, USA", lat: 38.135572, lng: -121.2719078 },
+{ name: "HB'S BOOT CORRAL", address: "3003 Porter Wagoner Blvd, West Plains, MO 65775, USA", lat: 36.7670496, lng: -91.8788312 },
+{ name: "HENRY'S CLOTHING", address: "6267 W Third St, Dayton, OH 45417, USA", lat: 39.7467084, lng: -84.2957635 },
+{ name: "HERMANOS LOPEZ WESTERN WEAR", address: "911 W Chicago Ave, East Chicago, IN 46312, USA", lat: 41.6289359, lng: -87.4828759 },
+{ name: "HERNANDEZ WIRELESS LLC", address: "702 W Lewis St Suite-B, Pasco, WA 99301, USA", lat: 46.2294377, lng: -119.0959893 },
+{ name: "HERRADURA", address: "133 Weaverville Rd Suite 4, Asheville, NC 28804, USA", lat: 35.6460746, lng: -82.5799192 },
+{ name: "HERRADURA BRAND", address: "1204 S Bristol St, Santa Ana, CA 92704, USA", lat: 33.7328131, lng: -117.8857184 },
+{ name: "HERRADURA DE ORO", address: "217 N Euclid Ave, Ontario, CA 91762, USA", lat: 34.0651917, lng: -117.6515059 },
+{ name: "HEWLETT & DUNN", address: "111 N Center St, Collierville, TN 38017, USA", lat: 35.0429292, lng: -89.665815 },
+{ name: "HICKS CO", address: "410 W Choctaw Ave, Chickasha, OK 73018, USA", lat: 35.052756, lng: -97.9374003 },
+{ name: "HILDA MUNIZ", address: "3731 Morgan Rd, Ceres, CA 95307, USA", lat: 37.5833754, lng: -120.9756694 },
+{ name: "HOLLYWOOD WESTERN WEAR", address: "1904 Fern Tree Ct, Bakersfield, CA 93304, USA", lat: 35.3136547, lng: -119.023966 },
+{ name: "HOMESTEAD APPAREL", address: "3112 Moros Ct, Fort Myers, FL 33905, USA", lat: 26.6960645, lng: -81.7167081 },
+{ name: "HONG KONG TAILORS", address: "1839 W Broad St, Richmond, VA 23220, USA", lat: 37.5562703, lng: -77.4603367 },
+{ name: "HOOK UP FASHIONS", address: "4011 Page Blvd, St. Louis, MO 63113, USA", lat: 38.6502542, lng: -90.2365412 },
+{ name: "HORSE COUNTRY", address: "922 Gainesville Hwy #106, Buford, GA 30518, USA", lat: 34.144899, lng: -83.965921 },
+{ name: "IMAGE MENS WEAR", address: "128 Broad St, Elizabeth, NJ 07201, USA", lat: 40.666128, lng: -74.2151783 },
+{ name: "IMPERIO MUSICAL", address: "4321 7th St W, Lehigh Acres, FL 33971, USA", lat: 26.6194132, lng: -81.7136281 },
+{ name: "IMPORTACIONES GUANAJUATO", address: "2787 E Del Amo Blvd, East Compton, CA 90221, USA", lat: 33.8476819, lng: -118.212274 },
+{ name: "IN 2 HATS", address: "Miller Rd, Flint, MI 48507, USA", lat: 42.9821498, lng: -83.7558471 },
+{ name: "INDIOS BOOTS", address: "910 SE Military Dr d 119, San Antonio, TX 78214, USA", lat: 29.3547696, lng: -98.4849858 },
+{ name: "INDOMABLE WESTERN WEAR", address: "11914 Aldine Westfield Rd, Houston, TX 77093, USA", lat: 29.8854651, lng: -95.3546217 },
+{ name: "INNOVACIONES EL ALAZAN #2", address: "170 E New Circle Rd, Lexington, KY 40505, USA", lat: 38.0628096, lng: -84.4688682 },
+{ name: "INNOVATIONS BOOTS AND JEWELRY", address: "2855 Ross Clark Cir, Dothan, AL 36301, USA", lat: 31.2162869, lng: -85.4321454 },
+{ name: "IRIS MENSWEAR", address: "1120 N Tustin St #102, Orange, CA 92867, USA", lat: 33.8063229, lng: -117.8360654 },
+{ name: "IRMA & JOHN'S JEWELS LIMITED", address: "944 Liberty St, Belvidere, NJ 07823, USA", lat: 40.8191428, lng: -75.0680042 },
+{ name: "ISLAS FASHION", address: "104 N Center St, Marshalltown, IA 50158, USA", lat: 42.0508723, lng: -92.9131873 },
+{ name: "ITALIAN COLLECTION", address: "8780 Pershall Rd Spc D, Hazelwood, MO 63042, USA", lat: 38.7738914, lng: -90.3376235 },
+{ name: "ITALIAN CONNECTION MEN'S WEAR", address: "1337 Rosewood Ave SE, Grand Rapids, MI 49506, USA", lat: 42.9385174, lng: -85.6271947 },
+{ name: "J C HATS & BELTS", address: "1201 N Hill Field Rd #1810, Layton, UT 84041, USA", lat: 41.0785409, lng: -111.9774575 },
+{ name: "J.M. CAPRIOLA CO.", address: "500 Commercial St, Elko, NV 89801, USA", lat: 40.8317259, lng: -115.7615182 },
+{ name: "JAB LEATHER IMPORT", address: "9700 Harwin Dr. suite 217, Houston, TX 77036, USA", lat: 29.7183087, lng: -95.5319491 },
+{ name: "JADE WESTERN WEAR", address: "4921 NW 23rd St, Oklahoma City, OK 73127, USA", lat: 35.4937453, lng: -97.6120419 },
+{ name: "JAIMES WESTERN WEAR LLC.", address: "FL-600, Haines City, FL, USA", lat: 28.1066305, lng: -81.6443651 },
+{ name: "JALENE PERFUMES AND JEWELRY", address: "2235 Story Rd, San Jose, CA 95122, USA", lat: 37.3464071, lng: -121.8341406 },
+{ name: "JALISCO WESTERN WEAR", address: "235 E 3300 S, Salt Lake City, UT 84115, USA", lat: 40.7002175, lng: -111.8842929 },
+{ name: "JANET'S JUST FOR YOU", address: "1750 N Sheridan Rd #1, Peoria, IL 61604, USA", lat: 40.7091225, lng: -89.6033022 },
+{ name: "JANITZIO WESTERN WEAR", address: "1584 CA-99, Gridley, CA 95948, USA", lat: 39.361776, lng: -121.6865437 },
+{ name: "JB DISTRIBUTION MARKET", address: "1422 S Redwood Rd, Salt Lake City, UT 84104, USA", lat: 40.7385948, lng: -111.9398597 },
+{ name: "JB'S HOUSE OF FASHION", address: "1630 3rd Ave W, Birmingham, AL 35208, USA", lat: 33.5053433, lng: -86.8641595 },
+{ name: "JC WESTERN SUPPLY", address: "729 N Military Trl, West Palm Beach, FL 33415, USA", lat: 26.6879936, lng: -80.1121403 },
+{ name: "JEANS AND THINGS", address: "4716 Margaretta Ave, St. Louis, MO 63115, USA", lat: 38.6755229, lng: -90.2433223 },
+{ name: "JENNIFER FASHION", address: "417 E Lake St #40, Minneapolis, MN 55408, USA", lat: 44.9480926, lng: -93.2694767 },
+{ name: "JESSE'S SHOE REPAIR # 2", address: "1976 Cypress Creek Pkwy, Houston, TX 77090, USA", lat: 30.0104488, lng: -95.4585626 },
+{ name: "JIM & DOTS SHOE", address: "113 W Davie St, Anna, IL 62906, USA", lat: 37.4600493, lng: -89.2484643 },
+{ name: "JIMENEZ CHARRO WESTERN WEAR", address: "3862 South Fwy, Fort Worth, TX 76110, USA", lat: 32.6912463, lng: -97.3213878 },
+{ name: "JIM'S WESTERN WEAR", address: "1123 San Fernando Rd, San Fernando, CA 91340, USA", lat: 34.2836327, lng: -118.4420456 },
+{ name: "JIREH FINE GIFTS", address: "519 Madison St a, Shelbyville, TN 37160, USA", lat: 35.4884897, lng: -86.4516778 },
+{ name: "J-LONDONS MENSWEAR", address: "428 S Saginaw St, Flint, MI 48502, USA", lat: 43.0162661, lng: -83.6914982 },
+{ name: "JOAQUIN BOOTS", address: "8610 Van Nuys Blvd, Panorama City, CA 91402, USA", lat: 34.2265793, lng: -118.4488017 },
+{ name: "JOE BOOTS", address: "5432 Whittier Blvd, Commerce, CA 90022, USA", lat: 34.0190184, lng: -118.1532394 },
+{ name: "JOE PORTER'S", address: "2645 Gratiot Ave, Detroit, MI 48207, USA", lat: 42.3533146, lng: -83.0318999 },
+{ name: "JOES FASHION", address: "2850 Division Ave S, Grand Rapids, MI 49548, USA", lat: 42.9107989, lng: -85.6642766 },
+{ name: "JONES BOOTS", address: "223 E Main St, Sheldon, MO 64784, USA", lat: 37.6577999, lng: -94.2943159 },
+{ name: "JORGE SANCHEZ GUTIERREZ", address: "585 Glenoaks Blvd, San Fernando, CA 91340, USA", lat: 34.2868801, lng: -118.425523 },
+{ name: "JOSE JR. L MANRIQUE", address: "284 E 49th St, San Bernardino, CA 92404, USA", lat: 34.1733487, lng: -117.2792785 },
+{ name: "JOVANNA'S", address: "1736 E Mulberry St B, Fort Collins, CO 80524, USA", lat: 40.5816454, lng: -105.0449631 },
+{ name: "JOYERIA & DEPORTES 2 HERMANOS LLC", address: "3248 17th St, Sarasota, FL 34235, USA", lat: 27.3520681, lng: -82.5042775 },
+{ name: "JOYERIA ALONDRA", address: "5908 E 64th Ave b, Commerce City, CO 80022, USA", lat: 39.8115414, lng: -104.9196533 },
+{ name: "JOYERIA CRUZ & WESTERN WEAR", address: "14341 E 14th St, San Leandro, CA 94578, USA", lat: 37.710878, lng: -122.1375025 },
+{ name: "JOYERIA CUQUIO #2", address: "21192 Hesperian Blvd, Hayward, CA 94541, USA", lat: 37.6641222, lng: -122.1165913 },
+{ name: "JOYERIA DEL SOL # 2", address: "233 S White Rd #1, San Jose, CA 95127, USA", lat: 37.3623728, lng: -121.8255681 },
+{ name: "JOYERIA EL DORADO", address: "929 Whitley Ave, Corcoran, CA 93212, USA", lat: 36.0977815, lng: -119.5591836 },
+{ name: "JOYERIA EL NUEVO MUNDO", address: "5115 N Federal Blvd #8, Denver, CO 80221, USA", lat: 39.7898879, lng: -105.0260492 },
+{ name: "JOYERIA FLOR MARIA", address: "1115 W Main St h bldg b, Santa Maria, CA 93458, USA", lat: 34.9539618, lng: -120.4521904 },
+{ name: "JOYERIA HERRERA'S", address: "2404 McCall Ave, Selma, CA 93662, USA", lat: 36.5691188, lng: -119.6099802 },
+{ name: "JOYERIA LA PERLA", address: "29 E 16th St, Merced, CA 95340, USA", lat: 37.2978461, lng: -120.4755679 },
+{ name: "JOYERIA LINARES", address: "307 New Market Rd W, Immokalee, FL 34142, USA", lat: 26.4292695, lng: -81.4200797 },
+{ name: "JOYERIA LOS ANGELES", address: "5805 Watt Ave, North Highlands, CA 95660, USA", lat: 38.6723183, lng: -121.3834441 },
+{ name: "JOYERIA MEXICANA", address: "23430 FM1314, Porter, TX 77365, USA", lat: 30.1075396, lng: -95.2590381 },
+{ name: "JOYERIA RAMOS", address: "34716 Alvarado-Niles Rd, Union City, CA 94587, USA", lat: 37.5866273, lng: -122.0179025 },
+{ name: "JOYERIA REYNOSO", address: "647 Front St, Soledad, CA 93960, USA", lat: 36.4260746, lng: -121.327449 },
+{ name: "JOYERIA RUBY", address: "2803 Highland Ave Ste 105, Selma, CA 93662, USA", lat: 36.5740564, lng: -119.6302074 },
+{ name: "JOYERIA SANTA ROSA", address: "1110 Petaluma Hill Rd STE 4, Santa Rosa, CA 95404, USA", lat: 38.4272643, lng: -122.7097336 },
+{ name: "JOYERIA Y PERFUMERIA MAYRA", address: "7321 Thornton Ave, Newark, CA 94560, USA", lat: 37.5300764, lng: -122.0387375 },
+{ name: "JOYERIA Y ROPA VAQUERA LA GUADALUPANA", address: "Historic District, 8630 Mathis Ave, Manassas, VA 20110, USA", lat: 38.7681928, lng: -77.4568821 },
+{ name: "JR SHOES", address: "3510 W 109th St, Inglewood, CA 90303, USA", lat: 33.9365764, lng: -118.333262 },
+{ name: "JR'S WESTERN STORE", address: "1120 Millcreek Rd, Lebanon, MO 65536, USA", lat: 37.6833079, lng: -92.6474141 },
+{ name: "JUAN GARAVATO WESTERN WEAR", address: "2342 Alum Rock Ave, San Jose, CA 95116, USA", lat: 37.3584893, lng: -121.842428 },
+{ name: "JUANI WESTERN WEAR", address: "10431 Country View Ln, Forney, TX 75126, USA", lat: 32.7259603, lng: -96.4428973 },
+{ name: "JUDY'S PLAZA", address: "3200 E 44th Ave, Denver, CO 80216, USA", lat: 39.7775147, lng: -104.9494117 },
+{ name: "JULIA FASHION BOUTIQUE", address: "Julia Fashion Boutique, 131 Main St, Matawan, NJ 07747, USA", lat: 40.4148299, lng: -74.2292425 },
+{ name: "JULIA PEREZ", address: "4525 W 66th St, Chicago, IL 60629, USA", lat: 41.7728385, lng: -87.7358389 },
+{ name: "JULIE'S BOUTIQUE LTD", address: "1464 University Ave, Green Bay, WI 54302, USA", lat: 44.5113474, lng: -87.988382 },
+{ name: "KANI LEATHER GOODS", address: "1201 Boston Post Rd #1006, Milford, CT 06460, USA", lat: 41.2359938, lng: -73.035543 },
+{ name: "KC WESTERN WEAR", address: "7610 Office City Dr, Houston, TX 77012, USA", lat: 29.7001275, lng: -95.2865089 },
+{ name: "KENNETH WAYNE CLOTHING", address: "1250 4th St SW W315, Washington, DC 20024, USA", lat: 38.8754569, lng: -77.0173257 },
+{ name: "KENTUCKY RODEO", address: "4908 Preston Hwy, Louisville, KY 40213, USA", lat: 38.1764127, lng: -85.7151759 },
+{ name: "KIMBERLY'S FAMILY WEAR", address: "28 W Court St, Woodland, CA 95695, USA", lat: 38.6799722, lng: -121.7854571 },
+{ name: "KING J BOOTS", address: "38118 47th St E e, Palmdale, CA 93552, USA", lat: 34.5748704, lng: -118.0436693 },
+{ name: "KINGDOM MENS SUITS", address: "1600 Premium Outlets Blvd #632, Norfolk, VA 23502, USA", lat: 36.8811295, lng: -76.2008328 },
+{ name: "KINGS SADDLERY", address: "8972 E Lacey Blvd, Hanford, CA 93230, USA", lat: 36.3279958, lng: -119.6184155 },
+{ name: "KINGSMEN SHOES", address: "Parking lot, 22755 Greenfield Rd, Southfield, MI 48075, USA", lat: 42.4582831, lng: -83.2020314 },
+{ name: "KLEINSCHMIDTHS WESTERN STORE", address: "19715 N Outer Rd, Higginsville, MO 64037, USA", lat: 39.0020145, lng: -93.7440898 },
+{ name: "KOPLEN CLOTHING CO", address: "214 N Union St, Danville, VA 24541, USA", lat: 36.5892424, lng: -79.3933939 },
+{ name: "L.A. MEN'S WEAR #2", address: "304 Broadway St, King City, CA 93930, USA", lat: 36.2128913, lng: -121.1266619 },
+{ name: "LA AMISTAD", address: "508 N Main St, Guymon, OK 73942, USA", lat: 36.683036, lng: -101.4818304 },
+{ name: "LA AUTENTICA", address: "104 Turner Dr B, Reidsville, NC 27320, USA", lat: 36.3393343, lng: -79.6548848 },
+{ name: "LA BAMBA", address: "La Bamba Inc, 421 1/2 N Washington St, Lexington, NE 68850, USA", lat: 40.7775803, lng: -99.7418558 },
+{ name: "LA BONITA DISCOTECA Y JOYERIA", address: "1317 7th St, Sanger, CA 93657, USA", lat: 36.7062724, lng: -119.5564506 },
+{ name: "LA BOTA DE ORO Y VARIEDADES", address: "650 Port Chicago Hwy bldg # 650, Bay Point, CA 94565, USA", lat: 38.035, lng: -121.9614363 },
+{ name: "LA BUFA CLOTHING INC.", address: "1604 E Grand Ave, Des Moines, IA 50316, USA", lat: 41.5947344, lng: -93.5924191 },
+{ name: "LA CASA DEL VAQUERO", address: "Denver, CO 80022, USA", lat: 39.866593, lng: -104.7754307 },
+{ name: "LA CHAPARRITA #2", address: "2655 W Broad St, Columbus, OH 43204, USA", lat: 39.95484, lng: -83.0712454 },
+{ name: "LA CHICANITA", address: "Blythe, GA 30805, USA", lat: 33.2926427, lng: -82.2015103 },
+{ name: "LA CHIQUITA", address: "207 E Madison Ave, Athens, TN 37303, USA", lat: 35.442723, lng: -84.591114 },
+{ name: "LA CONECTA WESTERN WEAR", address: "1322 E Harding Way, Stockton, CA 95205, USA", lat: 37.9701029, lng: -121.2775891 },
+{ name: "LA DINASTIA VAQUERA", address: "3101 W 26th St, Chicago, IL 60623, USA", lat: 41.8435314, lng: -87.7020197 },
+{ name: "LA ELEGANCIA", address: "3520 Williamson Rd, Roanoke, VA 24012, USA", lat: 37.3031965, lng: -79.9446383 },
+{ name: "LA ESPERANSA", address: "265 S West St, Tulare, CA 93274, USA", lat: 36.204391, lng: -119.3676842 },
+{ name: "LA ESTRELLITA FASHION", address: "2501 Easton Blvd, Des Moines, IA 50317, USA", lat: 41.6070016, lng: -93.5704864 },
+{ name: "LA FAMILIAR", address: "4428 S 24th St, Omaha, NE 68107, USA", lat: 41.2151883, lng: -95.947316 },
+{ name: "LA FAVORITA", address: "1809 N Broadway St Ste D, Wichita, KS 67214, USA", lat: 37.7156139, lng: -97.3358651 },
+{ name: "LA FIESTA REGALOS", address: "1319 Solano St, Corning, CA 96021, USA", lat: 39.9276108, lng: -122.1831762 },
+{ name: "LA FLORECITA WESTERN WEAR", address: "1339 US-17, Wauchula, FL 33873, USA", lat: 27.52812, lng: -81.8089599 },
+{ name: "LA FRONTERA STORE", address: "200 1st St NW, Hampton, IA 50441, USA", lat: 42.7437607, lng: -93.209006 },
+{ name: "LA GLORIA", address: "4140 Meridian St Ste 100, Bellingham, WA 98226, USA", lat: 48.7927941, lng: -122.4860196 },
+{ name: "LA GLORIA # 3", address: "4739 Guide Meridian Rd, Bellingham, WA 98226, USA", lat: 48.8131372, lng: -122.4873846 },
+{ name: "LA GRAN BOTA", address: "7611 W Thomas Rd, Phoenix, AZ 85033, USA", lat: 33.4769282, lng: -112.2251754 },
+{ name: "LA GRAN BOTA", address: "6016 S Central Ave, Phoenix, AZ 85042, USA", lat: 33.391412, lng: -112.074911 },
+{ name: "LA GRAN BOTA", address: "5127 W Indian School Rd #133, Phoenix, AZ 85031, USA", lat: 33.4937231, lng: -112.1700135 },
+{ name: "LA GRAN BOTA", address: "3433 W Van Buren St #1, Phoenix, AZ 85009, USA", lat: 33.451043, lng: -112.133567 },
+{ name: "LA GUADALUPANA SILER CITY INC", address: "518 W Raleigh St, Siler City, NC 27344, USA", lat: 35.7212681, lng: -79.4693426 },
+{ name: "LA GUERA", address: "7355 Lankershim Blvd #44, North Hollywood, CA 91605, USA", lat: 34.204171, lng: -118.3887423 },
+{ name: "LA HACIENDA WESTERN WEAR LLC", address: "406 Fair Rd #7, Statesboro, GA 30458, USA", lat: 32.4385171, lng: -81.7834625 },
+{ name: "LA HERRADURA WESTERN WEAR INC.", address: "7380 Two Notch Rd, Columbia, SC 29223, USA", lat: 34.0692623, lng: -80.9514797 },
+{ name: "LA ILUSION", address: "219 Main St, Fort Morgan, CO 80701, USA", lat: 40.2493071, lng: -103.8016858 },
+{ name: "LA JALISCO INC.", address: "2632 Lee Ave, Sanford, NC 27332, USA", lat: 35.4536285, lng: -79.1513748 },
+{ name: "LA MEXICANA WESTERN WEAR LLC.", address: "4648 Richmond Hwy, Richmond, VA 23234, USA", lat: 37.462899, lng: -77.4431063 },
+{ name: "LA MEXICANITA INC.", address: "409 N Haywood St, Waynesville, NC 28786, USA", lat: 35.4906039, lng: -82.9891511 },
+{ name: "LA MINITA WESTERN WEAR", address: "347 Rodriguez St, Watsonville, CA 95076, USA", lat: 36.9089716, lng: -121.7581074 },
+{ name: "LA MODA", address: "3823 Branch Ave, Hillcrest Heights, MD 20748, USA", lat: 38.8397784, lng: -76.9485879 },
+{ name: "LA MODA AL DIA", address: "4714 Nolensville Pk, Nashville, TN 37211, USA", lat: 36.0676088, lng: -86.7181175 },
+{ name: "LA MODA WESTERN WEAR", address: "308 S McLean Blvd, Elgin, IL 60123, USA", lat: 42.0254882, lng: -88.3146676 },
+{ name: "LA MORELENSE WESTERN WEAR LLC", address: "11711 Princeton Pike #281, Springdale, OH 45246, USA", lat: 39.2899752, lng: -84.4691103 },
+{ name: "LA MORENA", address: "829 Wilson Dr Suite D, Ridgeland, MS 39157, USA", lat: 32.4045625, lng: -90.1384569 },
+{ name: "LA MORENITA FASHION", address: "4924 US Hwy 19 N, Palm Harbor, FL 34683, USA", lat: 28.0859877, lng: -82.7392763 },
+{ name: "LA MUSICA LATINA", address: "150 E Jackson St, Mountain Home, ID 83647, USA", lat: 43.1310369, lng: -115.6937334 },
+{ name: "LA NORTENITA", address: "290 Broadway, Newburgh, NY 12550, USA", lat: 41.5011091, lng: -74.0203263 },
+{ name: "LA NUEVA IMAGEN", address: "1458 Main St, Newman, CA 95360, USA", lat: 37.3136547, lng: -121.0217102 },
+{ name: "LA PERLA FASHION", address: "1018 CO-133, Carbondale, CO 81623, USA", lat: 39.4006585, lng: -107.2185268 },
+{ name: "LA PI ATA MEXICAN IMPORTS", address: "4842 S Redwood Rd, Salt Lake City, UT 84123, USA", lat: 40.6642583, lng: -111.9394701 },
+{ name: "LA POBLANA", address: "751 Simmons Ave, Los Angeles, CA 90022, USA", lat: 34.0190148, lng: -118.1463896 },
+{ name: "LA RANCHERITA WESTERN WEAR", address: "5210 W Market St, Greensboro, NC 27409, USA", lat: 36.0701572, lng: -79.8804817 },
+{ name: "LA RAZA WESTERN WEAR INC", address: "2835 Broadway St, Houston, TX 77017, USA", lat: 29.6994141, lng: -95.277514 },
+{ name: "LA REINA DEL SUR", address: "2346 S Academy Blvd, Colorado Springs, CO 80916, USA", lat: 38.7979575, lng: -104.7586227 },
+{ name: "LA REYNA FAMILY FASHIONS", address: "208 E Mission Rd, Fallbrook, CA 92028, USA", lat: 33.3848493, lng: -117.2500347 },
+{ name: "LA ROSITA MEXICAN STORE", address: "711 E Lincoln Ave, Nampa, ID 83686, USA", lat: 43.5663787, lng: -116.5638362 },
+{ name: "LA RUMBA", address: "124 Commercial St, Emporia, KS 66801, USA", lat: 38.3997956, lng: -96.1797802 },
+{ name: "LA TAPATIA VIDEO Y DISCOTECA", address: "629 Creston Rd, Paso Robles, CA 93446, USA", lat: 35.6282382, lng: -120.6742511 },
+{ name: "LA TIENDA NUEVA", address: "114 E 5th St, Oxnard, CA 93030, USA", lat: 34.197438, lng: -119.1769277 },
+{ name: "LA VAQUERITA WESTERN WEAR", address: "641 E Edison Ave, Sunnyside, WA 98944, USA", lat: 46.3234948, lng: -120.0118226 },
+{ name: "LA ZAPATERIA MEXICO", address: "112 W 4th St, Santa Ana, CA 92701, USA", lat: 33.7477546, lng: -117.8681731 },
+{ name: "LABERINTO WESTERN WEAR", address: "5710 S Pulaski Rd, Chicago, IL 60629, USA", lat: 41.7891071, lng: -87.7233031 },
+{ name: "LAMAS WESTERN WEAR", address: "875 S 1st St, San Jose, CA 95110, USA", lat: 37.3229495, lng: -121.8808339 },
+{ name: "LARES FASHIONS", address: "245 W Main St, Waukesha, WI 53186, USA", lat: 43.0117931, lng: -88.2304167 },
+{ name: "LARRY'S BOOTS", address: "Columbia, MO 65202, USA", lat: 39.0013395, lng: -92.3128326 },
+{ name: "LAS 3 BANDERAS", address: "2252 W Columbia Ave, Kissimmee, FL 34741, USA", lat: 28.307529, lng: -81.427623 },
+{ name: "LAS CABAÑAS WESTERN WEAR", address: "835 E Southern Ave Suite 10, Mesa, AZ 85204, USA", lat: 33.3928182, lng: -111.8130409 },
+{ name: "LAS CHICAS FASHION", address: "630 La Porte Rd, Waterloo, IA 50702, USA", lat: 42.4800725, lng: -92.323799 },
+{ name: "LAS JARAS WESTERN WEAR LLC", address: "500 W 84th Ave #2, Denver, CO 80260, USA", lat: 39.8487112, lng: -104.9932175 },
+{ name: "LAS LLS IMPORTS", address: "220 E 2nd N #3, Rexburg, ID 83440, USA", lat: 43.8300088, lng: -111.7774121 },
+{ name: "LAS NATHALYBOUTIQUE LLC.", address: "1200 E County Line Rd Suite #1604, Ridgeland, MS 39157, USA", lat: 32.4031233, lng: -90.1293176 },
+{ name: "LAS PALMAS", address: "600 W Mitchell St, Milwaukee, WI 53204, USA", lat: 43.0124802, lng: -87.9187322 },
+{ name: "LAS PRINCESAS #2", address: "3147 SW 20th St, Oklahoma City, OK 73108, USA", lat: 35.4449175, lng: -97.5727202 },
+{ name: "LAS TEXANAS WESTERN LLC.", address: "3585 Commercial Dr, Indianapolis, IN 46222, USA", lat: 39.8179363, lng: -86.2271051 },
+{ name: "LAS TRANCAS WESTERN WEAR", address: "5251 Ponderosa Way, Dallas, TX 75227, USA", lat: 32.7889758, lng: -96.7035872 },
+{ name: "LAS TRES BANDERAS", address: "12832 Chapman Ave a, Garden Grove, CA 92840, USA", lat: 33.7879741, lng: -117.9086694 },
+{ name: "LAS VAQUERITAS", address: "215 Main St, Fort Morgan, CO 80701, USA", lat: 40.2492572, lng: -103.8018385 },
+{ name: "LEAL WESTERN WEAR", address: "308 S McLean Blvd, Elgin, IL 60123, USA", lat: 42.0254882, lng: -88.3146676 },
+{ name: "LEGADO ITALIANO", address: "4501 S Alameda St, Los Angeles, CA 90058, USA", lat: 34.0022369, lng: -118.2413326 },
+{ name: "LEON BOOTS", address: "1661 Talmage Rd, Ukiah, CA 95482, USA", lat: 39.1328959, lng: -123.1723248 },
+{ name: "LEON LEATHER", address: "2003 Bikini Ave, San Jose, CA 95122, USA", lat: 37.3232028, lng: -121.8396577 },
+{ name: "LEON WESTERN WEAR", address: "1835 Rumrill Blvd, San Pablo, CA 94806, USA", lat: 37.9596071, lng: -122.3574233 },
+{ name: "LERMA'S WESTERN WEAR", address: "Worthington, MN, USA", lat: 43.6210985, lng: -95.5941436 },
+{ name: "LETI & DAYI JEWELRY", address: "131 E Wisconsin Ave, Appleton, WI 54911, USA", lat: 44.2727303, lng: -88.4046733 },
+{ name: "LETTYS WESTERN WEAR", address: "3968 Lake Worth Rd, Lake Worth Beach, FL 33461, USA", lat: 26.6174776, lng: -80.10459 },
+{ name: "LIBERTY WESTERN`", address: "727 Cincinnati Ave, Lebanon, OH 45036, USA", lat: 39.4286991, lng: -84.2198081 },
+{ name: "LIDIA DOMINGUEZ", address: "4315 E Hammel St, East Los Angeles, CA 90022, USA", lat: 34.0426309, lng: -118.1730663 },
+{ name: "LIZ'S TIENDA VAQUERA", address: "3054 65th St E, Inver Grove Heights, MN 55076, USA", lat: 44.8548394, lng: -93.0438405 },
+{ name: "LIZYS' CLOTHING", address: "1690 7th St, Mendota, CA 93640, USA", lat: 36.7539187, lng: -120.382084 },
+{ name: "LO MEJOR DE LEON", address: "1224 Santee Alley, Los Angeles, CA 90015, USA", lat: 34.0372602, lng: -118.2558103 },
+{ name: "LOCUST GROVE COUNTRY", address: "3153 Garvers Ferry Rd, Apollo, PA 15613, USA", lat: 40.6043036, lng: -79.5254393 },
+{ name: "LOMA ALTA WESTERN WEAR", address: "9334 E R L Thornton Fwy #192, Dallas, TX 75228, USA", lat: 32.796095, lng: -96.6853956 },
+{ name: "LONG ISLAND BOOT & LEATHER INC.", address: "42 Montauk Hwy, Amity Harbor, NY 11701, USA", lat: 40.6674368, lng: -73.4024355 },
+{ name: "LOOKING GOOD", address: "785 Martin Luther King Jr Blvd, Greenville, MS 38701, USA", lat: 33.3963661, lng: -91.0384597 },
+{ name: "LOPEZ FASHION LLC", address: "3375 Division Ave S, Grand Rapids, MI 49548, USA", lat: 42.9027027, lng: -85.6666953 },
+{ name: "LOS 13 HERMANOS INC.", address: "5442 Whittier Blvd, East Los Angeles, CA 90022, USA", lat: 34.0191244, lng: -118.1527257 },
+{ name: "LOS 2 GALLOS", address: "1824 W 3500 S, West Valley City, UT 84119, USA", lat: 40.697262, lng: -111.9416986 },
+{ name: "LOS 3 VAQUEROS", address: "1208 S Grand St, Amarillo, TX 79104, USA", lat: 35.1975702, lng: -101.7958407 },
+{ name: "LOS ALAZANES", address: "153 Clapp Dr, Asheboro, NC 27205, USA", lat: 35.7233538, lng: -79.735595 },
+{ name: "LOS ANGELES FASHION", address: "2924 Rocky Branch Rd, Hamptonville, NC 27020, USA", lat: 36.1177952, lng: -80.7977197 },
+{ name: "LOS COMPAS", address: "650 28th St SW, Wyoming, MI 49509, USA", lat: 42.9130315, lng: -85.6828331 },
+{ name: "LOS CORRALES WESTERN WEAR", address: "29 N Main St, Brighton, CO 80601, USA", lat: 39.9874146, lng: -104.8217043 },
+{ name: "LOS DOS POTRILLOS WESTERN WEAR", address: "13906 Almeda Rd, Houston, TX 77053, USA", lat: 29.6048961, lng: -95.423575 },
+{ name: "LOS GARCIAS TIENDA MEXICANA", address: "9320 NC-107, Tuckasegee, NC 28783, USA", lat: 35.2802558, lng: -83.1231725 },
+{ name: "LOS LEYVA WESTERN WEAR #2", address: "999 Francisco Blvd E, San Rafael, CA 94901, USA", lat: 37.9599375, lng: -122.5038787 },
+{ name: "LOS PATRONES WESTERN WEAR", address: "1506 Tupelo Ln, Elgin, SC 29045, USA", lat: 34.1764713, lng: -80.8101597 },
+{ name: "LOS POTRILLOS WESTERN WEAR", address: "18068 Sonoma Hwy, Sonoma, CA 95476, USA", lat: 38.3142669, lng: -122.4818875 },
+{ name: "LOS POTROS", address: "1281 N Santa Fe Ave # F, Vista, CA 92084, USA", lat: 33.2166604, lng: -117.2442687 },
+{ name: "LOS POTROS BOOTS", address: "517 C St, Schuyler, NE 68661, USA", lat: 41.4421761, lng: -97.0562851 },
+{ name: "LOS PRIMOS", address: "2201 N 83rd Ave #108, Phoenix, AZ 85035, USA", lat: 33.4721249, lng: -112.2370046 },
+{ name: "LOS REYES BOOTS", address: "257 Windward Dr, Port Jefferson, NY 11777, USA", lat: 40.9348907, lng: -73.0478571 },
+{ name: "LOS TRES POTRILLOS", address: "3940 International Blvd, Oakland, CA 94601, USA", lat: 37.7742262, lng: -122.2180782 },
+{ name: "LOS VAQUEROS DE CHIHUAHUA BOOTS", address: "334 E Lake St #107, Minneapolis, MN 55408, USA", lat: 44.9485955, lng: -93.2706279 },
+{ name: "LOZANO WESTERN", address: "1025 San Fernando Rd, San Fernando, CA 91340, USA", lat: 34.282506, lng: -118.4410222 },
+{ name: "LURO BOOTS", address: "7831 Portland Ave, Bloomington, MN 55420, USA", lat: 44.8610744, lng: -93.2675273 },
+{ name: "M & M JEWELRY MART #3", address: "151 N Valencia Blvd, Woodlake, CA 93286, USA", lat: 36.4147921, lng: -119.0991746 },
+{ name: "M STUART'S LTD", address: "568 W Roosevelt Rd #1, Chicago, IL 60605, USA", lat: 41.8672923, lng: -87.6320003 },
+{ name: "M.R. BOOTS", address: "134 Painter St, Trafford, PA 15085, USA", lat: 40.3963185, lng: -79.7231324 },
+{ name: "MABELLA BOUTIQUE LLC", address: "307 E Broadway Ave, Moses Lake, WA 98837, USA", lat: 47.1321553, lng: -119.2757789 },
+{ name: "MALOUF'S J-M WESTERN", address: "817 Houston St, Levelland, TX 79336, USA", lat: 33.5876706, lng: -102.3774459 },
+{ name: "MANDE SUITS", address: "6252 Atlanta Hwy, Montgomery, AL 36117, USA", lat: 32.3821272, lng: -86.1906139 },
+{ name: "MANNY'S BOOTS", address: "20 N Winston St, Reynolds, GA 31076, USA", lat: 32.5601155, lng: -84.0959447 },
+{ name: "MARCO POLOS", address: "1940 Crows Landing Rd #7, Modesto, CA 95358, USA", lat: 37.60077, lng: -120.991976 },
+{ name: "MARES BOOTS", address: "300 W North Ave, Villa Park, IL 60181, USA", lat: 41.9073882, lng: -87.9863612 },
+{ name: "MARGARET'S BOUTIQUE", address: "20312 Joy Ln, Lynwood, IL 60411, USA", lat: 41.5263343, lng: -87.5709117 },
+{ name: "MARIA REYNAGA", address: "4552 W McKinley Ave, Fresno, CA 93722, USA", lat: 36.7648379, lng: -119.8746174 },
+{ name: "MARIA'S FASHION", address: "4136 W 26th St, Chicago, IL 60623, USA", lat: 41.8444606, lng: -87.7285311 },
+{ name: "MARIA'S FINE JEWELRY", address: "212 E Cross Ave, Tulare, CA 93274, USA", lat: 36.2139469, lng: -119.3470769 },
+{ name: "MARIO'S BOOTS & STORE", address: "302 Willow St, San Jose, CA 95110, USA", lat: 37.3176355, lng: -121.8841331 },
+{ name: "MARIO'S WESTERN WEAR", address: "2647 S Drake Ave, Chicago, IL 60623, USA", lat: 41.8430246, lng: -87.7132797 },
+{ name: "MARKLEGRAND LLC.", address: "634 N Main St, Pleasantville, NJ 08232, USA", lat: 39.400219, lng: -74.5146185 },
+{ name: "MARQUEZ BOOTS", address: "3005 Strong Ave, Kansas City, KS 66106, USA", lat: 39.0749135, lng: -94.6640278 },
+{ name: "MARTHA'S INC.", address: "151 Cascade Mall Dr, Burlington, WA 98233, USA", lat: 48.4660442, lng: -122.3373392 },
+{ name: "MARTINEZ WESTERN WEAR", address: "2824 E 2nd St, Newberg, OR 97132, USA", lat: 45.2987736, lng: -122.9508328 },
+{ name: "MARYLOU'S FEED & TACK", address: "8050 Bayshore Rd, North Fort Myers, FL 33917, USA", lat: 26.7144419, lng: -81.8251446 },
+{ name: "MASTROIANNI FASHIONS", address: "1701 S Decatur Blvd, Las Vegas, NV 89102, USA", lat: 36.1514889, lng: -115.2077663 },
+{ name: "MAURICIO FASHION HANDBAGS", address: "122 Via Grande, Olivehurst, CA 95961, USA", lat: 39.0807168, lng: -121.5322384 },
+{ name: "MAYA WESTERN WEAR", address: "1521 College St, Beaumont, TX 77701, USA", lat: 30.0720367, lng: -94.1055981 },
+{ name: "MC DONALD'S HORSE SUPPLY", address: "Bonaire, GA 31005, USA", lat: 32.5437575, lng: -83.5960161 },
+{ name: "MEDINA'S MEAT MARKET", address: "2185 G St STE 100, Merced, CA 95340, USA", lat: 37.3034755, lng: -120.473414 },
+{ name: "MENS & BOYS STORE", address: "410 E Main St, Charlottesville, VA 22902, USA", lat: 38.0296713, lng: -78.4790794 },
+{ name: "MEN'S LAND", address: "20700 Avalon Blvd # 400, Carson, CA 90746, USA", lat: 33.8445251, lng: -118.2617986 },
+{ name: "MEN'S USA INC. ", address: "1751 Malcolm Ave, Los Angeles, CA 90024, USA", lat: 34.0509925, lng: -118.435494 },
+{ name: "MERCADO JEWELRY MART INC", address: "134 S 11th Ave, Hanford, CA 93230, USA", lat: 36.3222399, lng: -119.6570198 },
+{ name: "MEX LATINO ENVIOS INC.", address: "12434 S Western Ave, Blue Island, IL 60406, USA", lat: 41.6671616, lng: -87.6806928 },
+{ name: "MEXICAN BROTHERS", address: "5220 S Pulaski Rd c105 106, Chicago, IL 60632, USA", lat: 41.7983428, lng: -87.7248098 },
+{ name: "MEXICO Y SU ARTE", address: "7602 Centreville Rd, Manassas, VA 20111, USA", lat: 38.7897606, lng: -77.4489776 },
+{ name: "MI PUEBLITO WESTERN WEAR HUERTA", address: "2816 Beauchamp Rd, Little Rock, AR 72210, USA", lat: 34.7330183, lng: -92.5057323 },
+{ name: "MI RANCHITO WESTERN WEAR", address: "2632 Carolina Beach Rd #1, Wilmington, NC 28412, USA", lat: 34.1902, lng: -77.9348 },
+{ name: "MIDNIGHT STYLES", address: "175 Naranjal Dr, Brownsville, TX 78521, USA", lat: 25.9151928, lng: -97.3939869 },
+{ name: "MILANO", address: "6625 Pacific Blvd, Huntington Park, CA 90255, USA", lat: 33.9786036, lng: -118.2256046 },
+{ name: "MILANO CLOTHING", address: "11923 Fair Oaks Mall, Fairfax, VA 22033, USA", lat: 38.8626656, lng: -77.3598673 },
+{ name: "MIRASOLES", address: "Vineyard Meadows, 8589 Hydrangea Ct, Elk Grove, CA 95624, USA", lat: 38.4520759, lng: -121.3862112 },
+{ name: "MIRROR MIRROR FASHIONS", address: "4535 King Arthur Cove, Bartlett, TN 38135, USA", lat: 35.2492785, lng: -89.8499619 },
+{ name: "MISCELANIAS MANIQUIPA", address: "2400 E 88th Ave l, Denver, CO 80229, USA", lat: 39.8557503, lng: -104.9580969 },
+{ name: "MOBILE SHOE HOSPITAL", address: "7210 Airport Blvd, Mobile, AL 36608, USA", lat: 30.6877845, lng: -88.2112723 },
+{ name: "MOCCASINS WEST", address: "72-840 CA-111 G225, Palm Desert, CA 92260, USA", lat: 33.7235629, lng: -116.3956775 },
+{ name: "MODA LATINA VO INC", address: "932 Fulton St, Fresno, CA 93721, USA", lat: 36.7335935, lng: -119.7893055 },
+{ name: "MODA VAQUERA WESTERN WEAR LLC.", address: "2779 Gulf to Bay Blvd, Clearwater, FL 33759, USA", lat: 27.9601985, lng: -82.7222589 },
+{ name: "MODA Y MAS LLC.", address: "5190 W Pike Plaza Rd, Indianapolis, IN 46254, USA", lat: 39.83366, lng: -86.2491581 },
+{ name: "MODAS", address: "110 W 3rd St, Rifle, CO 81650, USA", lat: 39.5317446, lng: -107.7836196 },
+{ name: "MONICAS ATHLETIC", address: "1330 California Ave, Bakersfield, CA 93301, USA", lat: 35.3687125, lng: -119.0173959 },
+{ name: "MONICA'S FASHION", address: "1209 SE 6th St, Topeka, KS 66607, USA", lat: 39.0476176, lng: -95.6585078 },
+{ name: "MONSIVAIS LEATHER #2", address: "7528 Rosecrans Ave, Paramount, CA 90723, USA", lat: 33.903392, lng: -118.1679766 },
+{ name: "MONTAJ HONG KONG CUSTOM TAILORS", address: "201 Penn Center Blvd Bldg 1, Pittsburgh, PA 15235, USA", lat: 40.4286737, lng: -79.8113226 },
+{ name: "MORA'S JEANS", address: "3301 E Main St #2230, Ventura, CA 93003, USA", lat: 34.2684741, lng: -119.2484907 },
+{ name: "MORELOS WESTERN WEAR", address: "2850 Division Ave S, Grand Rapids, MI 49548, USA", lat: 42.9107989, lng: -85.6642766 },
+{ name: "MORENO'S BOOTS WESTERN WEAR", address: "5220 S Pulaski Rd, Chicago, IL 60632, USA", lat: 41.7983428, lng: -87.7248098 },
+{ name: "MORENO'S WESTERN WEAR", address: "7124 Federal Blvd #400, Westminster, CO 80030, USA", lat: 39.8260469, lng: -105.0235013 },
+{ name: "MOZITAS LLC", address: "2239 Independence Ln, Madison, WI 53704, USA", lat: 43.1292359, lng: -89.3095009 },
+{ name: "MR ALBERT'S", address: "618 Prospect Ave E, Cleveland, OH 44115, USA", lat: 41.498398, lng: -81.688469 },
+{ name: "MR. HAMMERS SHOES", address: "3100 E Imperial Hwy 2nd fl.t-7, Lynwood, CA 90262, USA", lat: 33.9284355, lng: -118.2133364 },
+{ name: "MR. KAY'S FASHIONS INC", address: "2218 Southlake Mall #604, Merrillville, IN 46410, USA", lat: 41.4704629, lng: -87.3109755 },
+{ name: "MULTISERVICE GUATE INC.", address: "773 Broad St, Central Falls, RI 02863, USA", lat: 41.8903551, lng: -71.3871987 },
+{ name: "MUNDO LATINO #2", address: "910 E William St, Carson City, NV 89701, USA", lat: 39.1708863, lng: -119.7592412 },
+{ name: "MUNDO MUSICAL", address: "243 W Francis St, Ontario, CA 91762, USA", lat: 34.0403899, lng: -117.6530602 },
+{ name: "MURO WESTERN", address: "1003 S Hampton Rd, Dallas, TX 75208, USA", lat: 32.7357721, lng: -96.8572138 },
+{ name: "MY LITTLE TEPOS", address: "5058 NY-22, Amenia, NY 12501, USA", lat: 41.8566079, lng: -73.5534944 },
+{ name: "NATIONWIDE PROMOTIONS", address: "Taylor, MI 48180, USA", lat: 42.2164077, lng: -83.2720082 },
+{ name: "NAVA'S SHOES", address: "840 Northgate Mile, Idaho Falls, ID 83401, USA", lat: 43.5033336, lng: -112.0263672 },
+{ name: "NELSON SHOE STORE", address: "18400 Collins St #24, Tarzana, CA 91356, USA", lat: 34.1742052, lng: -118.5333161 },
+{ name: "NESSABEL", address: "539 E Santa Fe St, Olathe, KS 66061, USA", lat: 38.8831272, lng: -94.8099175 },
+{ name: "NESSABEL WESTERN CLOTHES", address: "6417 E Truman Rd, Kansas City, MO 64126, USA", lat: 39.0935275, lng: -94.5067259 },
+{ name: "NEW YORK CLOTHIERS LLC", address: "206 Claire Ave c, Oak Grove, KY 42262, USA", lat: 36.669906, lng: -87.442729 },
+{ name: "NEW YORK FASHIONS INC.", address: "69 Peachtree St SW c, Atlanta, GA 30303, USA", lat: 33.7529934, lng: -84.3918503 },
+{ name: "NEYLAS Y EL POTRILLO", address: "14841 7th St, Dade City, FL 33523, USA", lat: 28.373782, lng: -82.190776 },
+{ name: "NIGRO'S WESTERN", address: "10509 Shawnee Mission Pkwy, Shawnee, KS 66203, USA", lat: 39.0144996, lng: -94.7085189 },
+{ name: "NINO'S", address: "1000 Rivergate Pkwy, Goodlettsville, TN 37072, USA", lat: 36.3026799, lng: -86.697929 },
+{ name: "NIPOMO WESTERN WEAR", address: "551 W Tefft St, Nipomo, CA 93444, USA", lat: 35.0352223, lng: -120.485354 },
+{ name: "NORA'S FASHION", address: "104 N Homestead Blvd, Homestead, FL 33030, USA", lat: 25.4691454, lng: -80.4727921 },
+{ name: "NOVEDADES 3 HERMANOS", address: "2417 S Harding Ave, Chicago, IL 60623, USA", lat: 41.8473946, lng: -87.7231533 },
+{ name: "NOVEDADES AZTECAS", address: "815 E State St, Rockford, IL 61104, USA", lat: 42.2665371, lng: -89.0843746 },
+{ name: "NOVEDADES CRISTAL", address: "319 Main St N, Austin, MN 55912, USA", lat: 43.6688565, lng: -92.9751567 },
+{ name: "NOVEDADES ESMERALDA", address: "4046 Crockett St, Richmond, VA 23228, USA", lat: 37.615263, lng: -77.4992786 },
+{ name: "NOVEDADES KIKA'S", address: "7555 Long Point Rd, Houston, TX 77055, USA", lat: 29.8024321, lng: -95.4793797 },
+{ name: "NOVEDADES LATINAS", address: "1193 N Cedar Lake Rd, Round Lake Beach, IL 60073, USA", lat: 42.3697129, lng: -88.0895452 },
+{ name: "NOVEDADES ROJAS", address: "2005 Greenwood Dr, Bakersfield, CA 93306, USA", lat: 35.3767615, lng: -118.9259215 },
+{ name: "NOVEDADES SANTIAGO", address: "3232 Blanchard St, Los Angeles, CA 90063, USA", lat: 34.0458578, lng: -118.192282 },
+{ name: "NOVEDADES VECKIS", address: "Jeff Adams Dr, Charlotte, NC 28206, USA", lat: 35.2746037, lng: -80.82383 },
+{ name: "NU IMAGE", address: "3717 Eastern Blvd, Montgomery, AL 36116, USA", lat: 32.3279497, lng: -86.2312131 },
+{ name: "OCAMPO WESTERN WEAR INC.", address: "10518 S Ewing Ave, Chicago, IL 60617, USA", lat: 41.7039615, lng: -87.5355481 },
+{ name: "OK BOOTS WESTERN WEAR LLC", address: "60 S Federal Blvd, Denver, CO 80219, USA", lat: 39.7154322, lng: -105.0247946 },
+{ name: "OK CORRAL", address: "5850 Etiwanda Ave #214, Mira Loma, CA 91752, USA", lat: 33.9816285, lng: -117.5225741 },
+{ name: "OK CORRAL", address: "3606 Landon Park Dr, Katy, TX 77449, USA", lat: 29.8233628, lng: -95.7282025 },
+{ name: "OK CORRAL INC", address: "3943 W 26th St, Chicago, IL 60623, USA", lat: 41.8444775, lng: -87.7240755 },
+{ name: "OK CORRAL VIP #2", address: "3300 W 26th St, Chicago, IL 60623, USA", lat: 41.8446157, lng: -87.7076685 },
+{ name: "OK CORRAL WESTERN WEAR", address: "1555 Farmersville Rd #211, Farmersville, CA 93223, USA", lat: 36.3111401, lng: -119.2078312 },
+{ name: "OLD G MENSWEAR LLC", address: "468 Chancellor Ave c23, Irvington, NJ 07111, USA", lat: 40.7110885, lng: -74.2283814 },
+{ name: "OLD RANCHO WESTERN WEAR", address: "2060 Chapel Hill Rd, Burlington, NC 27215, USA", lat: 36.0684223, lng: -79.4310059 },
+{ name: "OLIMPIA STORE", address: "11310 Venice Blvd., Los Angeles, CA 90066, USA", lat: 34.010981, lng: -118.4198539 },
+{ name: "OLIMPIA'S SHOES AND JEWELRY", address: "11853 Santa Monica Blvd, Los Angeles, CA 90025, USA", lat: 34.0424589, lng: -118.4595644 },
+{ name: "OLIVIA'S ROPA Y CALZADO", address: "4250 Cerrillos Rd space 1420, Santa Fe, NM 87507, USA", lat: 35.6360949, lng: -106.0147932 },
+{ name: "OMAYRA'S PIEL Y NOVEDADES", address: "636 E Foothill Blvd, Azusa, CA 91702, USA", lat: 34.1330341, lng: -117.8990909 },
+{ name: "ON TIME FASHION", address: "621 Texas St, Shreveport, LA 71101, USA", lat: 32.5114514, lng: -93.7510276 },
+{ name: "OPTIONS", address: "62 Shadowmoss Pkwy, Charleston, SC 29414, USA", lat: 32.8464724, lng: -80.0731477 },
+{ name: "ORDAZ WESTERN WEAR", address: "1364 Carolyn Ct, Orland, CA 95963, USA", lat: 39.7373349, lng: -122.1672932 },
+{ name: "ORGULLO VAQUERO", address: "14350 Laurie Ln c, San Pablo, CA 94806, USA", lat: 37.9650093, lng: -122.3434275 },
+{ name: "ORONAS WESTERN WEAR", address: "544 N Main St, Manteca, CA 95336, USA", lat: 37.8054169, lng: -121.2162001 },
+{ name: "OROPEL", address: "1323 E Houston Ave, Visalia, CA 93292, USA", lat: 36.3415171, lng: -119.2780535 },
+{ name: "ORTEGA FASHION", address: "644 Hoefner Ave, Los Angeles, CA 90022, USA", lat: 34.0221582, lng: -118.1489893 },
+{ name: "ORTIZ WESTERN WEAR", address: "135 E Yosemite Ave, Madera, CA 93638, USA", lat: 36.9627084, lng: -120.0588195 },
+{ name: "OT SPORTS", address: "172 Boone St, Burlington, NC 27215, USA", lat: 36.0753552, lng: -79.4164519 },
+{ name: "OUTLAWS WESTERN WEAR", address: "7055 San Pedro Ave, San Antonio, TX 78216, USA", lat: 29.5098836, lng: -98.4999719 },
+{ name: "OVANDO FASHION", address: "307 Foushee St, Durham, NC 27704, USA", lat: 36.0164725, lng: -78.8881889 },
+{ name: "OXFORD STREET", address: "300 The Bridge St #120, Huntsville, AL 35806, USA", lat: 34.7154255, lng: -86.672362 },
+{ name: "PALMYRA PANTS CO.", address: "9370 US-130, Pennsauken, NJ 08110, USA", lat: 39.9810571, lng: -75.0226437 },
+{ name: "PANTERA WESTERN WEAR", address: "2322 Macdonald Ave, Richmond, CA 94804, USA", lat: 37.9354429, lng: -122.3469196 },
+{ name: "PARAISO MUSICAL", address: "53 Manor Dr D, Pittsburg, CA 94565, USA", lat: 38.0263618, lng: -121.9470457 },
+{ name: "PARIS BY A 7 APPAREL INC", address: "6440 C Reisterstown Rd, Baltimore, MD 21215, USA", lat: 39.3556851, lng: -76.7024026 },
+{ name: "PARRAL WESTERN WEAR", address: "1909 Cecily Dr, Joliet, IL 60435, USA", lat: 41.557221, lng: -88.1582648 },
+{ name: "PATI O STORE", address: "82 S State St, Preston, ID 83263, USA", lat: 42.0944925, lng: -111.8769336 },
+{ name: "PATRON BOOTS", address: "900 N Farnsworth Ave, Aurora, IL 60505, USA", lat: 41.7759908, lng: -88.2834296 },
+{ name: "PAULATINA MEXICAN STORE", address: "20 SW Everett Mall Way #7, Everett, WA 98204, USA", lat: 47.9061504, lng: -122.2348145 },
+{ name: "PAYLESS ACCESSORIES", address: "448 W 19th St #778, Houston, TX 77008, USA", lat: 29.8024621, lng: -95.4054378 },
+{ name: "PEDRO GASCA-REYES", address: "Ming Ave, Bakersfield, CA 93307, USA", lat: 35.3395257, lng: -119.0096416 },
+{ name: "PEDRO SAUCEDO", address: "2630 S Rosewood Ave, Santa Ana, CA 92707, USA", lat: 33.7099574, lng: -117.8827925 },
+{ name: "PENN LEATHER", address: "1104 Carlisle Rd Unit 145, Camp Hill, PA 17011, USA", lat: 40.2314731, lng: -76.8925882 },
+{ name: "PERLA WESTERN WEAR", address: "10104 Veterans Memorial Dr, Houston, TX 77038, USA", lat: 29.9171652, lng: -95.4438555 },
+{ name: "PHIL HARRIS SADDLERY INC.", address: "219 Pat Nixon Rd, State Road, NC 28676, USA", lat: 36.3433604, lng: -80.8526792 },
+{ name: "PHILL ROSE SHOES", address: "1715 2nd Ave E, Oneonta, AL 35121, USA", lat: 33.9650012, lng: -86.45751 },
+{ name: "PHILLIP'S MENS CLOTHING", address: "2503 N Slappey Blvd, Albany, GA 31701, USA", lat: 31.6133707, lng: -84.1771828 },
+{ name: "PINEDA WESTERN WEAR", address: "9773 Sierra Ave. space b8, Fontana, CA 92335, USA", lat: 34.0759771, lng: -117.4340725 },
+{ name: "PISTOL CREEK WEST", address: "170 Banbury Rd, Columbia, SC 29210, USA", lat: 34.0477976, lng: -81.1481049 },
+{ name: "PLAZA DEL CALZADO", address: "410 W Lewis St, Pasco, WA 99301, USA", lat: 46.2305183, lng: -119.09095 },
+{ name: "PLAZA MEXICO", address: "200 S Green River Rd, Evansville, IN 47715, USA", lat: 37.9751271, lng: -87.4920049 },
+{ name: "PLAZA MOCTEZUMA 1 CORP", address: "430 E 138th St, Bronx, NY 10454, USA", lat: 40.808304, lng: -73.9217346 },
+{ name: "POTRILLO BLANCO", address: "6104 Van Buren Boulevard, Riverside, CA 92503, USA", lat: 33.9442314, lng: -117.455281 },
+{ name: "POTRILLO WESTERN WEAR", address: "1305 E Highland Ave, Selma, AL 36703, USA", lat: 32.4318907, lng: -87.0166774 },
+{ name: "PREMIER WESTERN WEAR", address: "2951 W 39th Pl, Chicago, IL 60632, USA", lat: 41.821581, lng: -87.6991254 },
+{ name: "PRESTIGIO ARTESANAL LLC", address: "8700 NE Vancouver Mall Dr Suit #247, Vancouver, WA 98662, USA", lat: 45.658205, lng: -122.5839078 },
+{ name: "PURE COUNTRY WESTERN WEAR", address: "121 W Main St, Branson, MO 65616, USA", lat: 36.6444613, lng: -93.2180453 },
+{ name: "QUINTANA WESTERN WEAR", address: "227 W Main St t 200, Merced, CA 95340, USA", lat: 37.3003137, lng: -120.4793592 },
+{ name: "R AND R SPORTSWEAR", address: "308 E 4th St, Santa Ana, CA 92701, USA", lat: 33.7477452, lng: -117.8653689 },
+{ name: "RALPHS MENSWEAR", address: "736-D, 736 E 36th St N, Tulsa, OK 74106, USA", lat: 36.2056072, lng: -95.9823928 },
+{ name: "RANCH & HOME", address: "845 N Columbia Center Blvd, Kennewick, WA 99336, USA", lat: 46.2187216, lng: -119.2250174 },
+{ name: "RANCHERO ZAMORA", address: "988 E Main St, Santa Paula, CA 93060, USA", lat: 34.353769, lng: -119.0601335 },
+{ name: "RANCHO ALEGRE WESTERN WEAR #2", address: "9323 Slauson Ave, Pico Rivera, CA 90660, USA", lat: 33.9689678, lng: -118.0979308 },
+{ name: "RANCHO BOOTS INC", address: "1171 Sixth St, Norco, CA 92860, USA", lat: 33.9386446, lng: -117.5470255 },
+{ name: "RANCHO GG WESTERN WEAR", address: "9075 Mission Blvd, Riverside, CA 92509, USA", lat: 34.012059, lng: -117.4815602 },
+{ name: "RANCHO GRANDE", address: "1538 E Grand Ave, Des Moines, IA 50316, USA", lat: 41.5945227, lng: -93.5935652 },
+{ name: "RANCHO VIEJO WESTERN WEAR", address: "630 Washington Ave, North Haven, CT 06473, USA", lat: 41.4224988, lng: -72.8388086 },
+{ name: "RANCHO WESTERN WEAR LLC.", address: "1401 2nd St suite C, North Wilkesboro, NC 28659, USA", lat: 36.1744848, lng: -81.1437751 },
+{ name: "RAPHAEL", address: "2034 Green Acres Rd E, Valley Stream, NY 11581, USA", lat: 40.6627359, lng: -73.7216384 },
+{ name: "REBECCAS MARKET AND RESTURANT", address: "631 W Arizona Ave, Homedale, ID 83628, USA", lat: 43.6232888, lng: -116.9457905 },
+{ name: "RED RIVER WESTERN WEAR #2", address: "49C Jr Rd, Selma, NC 27576, USA", lat: 35.5165042, lng: -78.2860982 },
+{ name: "RED ROCK WESTERN WEAR", address: "1640 Alum Rock Ave, San Jose, CA 95116, USA", lat: 37.3513995, lng: -121.8577313 },
+{ name: "REGAL MENS FASHIONS", address: "326 E 47th St, Chicago, IL 60653, USA", lat: 41.8095105, lng: -87.6185235 },
+{ name: "REMINGTON OUTPOST", address: "26300 Cortez Blvd, Brooksville, FL 34602, USA", lat: 28.5226616, lng: -82.3028008 },
+{ name: "REYES WESTERN WEAR & MORE", address: "1000 E Wardlow Rd b, Long Beach, CA 90807, USA", lat: 33.818576, lng: -118.1802561 },
+{ name: "REYMAR_WESTERN WEAR", address: "1639 S Buckner Blvd #208, Dallas, TX 75217, USA", lat: 32.7406106, lng: -96.6833212 },
+{ name: "REYNOSO IMPORTS", address: "124 S 1st Ave, Othello, WA 99344, USA", lat: 46.8246631, lng: -119.1744336 },
+{ name: "REYNOSO TEN'S SHOE", address: "10120 Main St, Lamont, CA 93241, USA", lat: 35.2632327, lng: -118.9149869 },
+{ name: "RIGO'S BOOT TOWN", address: "9165 W Van Buren St, Tolleson, AZ 85353, USA", lat: 33.4501049, lng: -112.2569835 },
+{ name: "RINCON LATINO", address: "1002 E Overland, Scottsbluff, NE 69361, USA", lat: 41.8591861, lng: -103.6495314 },
+{ name: "RINCON VAQUERO", address: "722 E Main St #107, Santa Maria, CA 93454, USA", lat: 34.95275, lng: -120.4261128 },
+{ name: "RITA ROCIO SALAZAR", address: "3065 Cudahy St, Huntington Park, CA 90255, USA", lat: 33.964929, lng: -118.2143858 },
+{ name: "RIVAS BOOTS #2", address: "3531 W McDowell Rd, Phoenix, AZ 85009, USA", lat: 33.4656936, lng: -112.1359727 },
+{ name: "RIVERAS WESTERN WEAR", address: "1002 S César E. Chávez Dr, Milwaukee, WI 53204, USA", lat: 43.0209767, lng: -87.9327717 },
+{ name: "ROBERTS COWBOY OUTFITTERS", address: "2259 S 9th St, Salina, KS 67401, USA", lat: 38.8015175, lng: -97.6097274 },
+{ name: "ROBLES WIRELESS INC", address: "321 Collins St, Joliet, IL 60432, USA", lat: 41.5307175, lng: -88.0730518 },
+{ name: "ROCK EM BOOTS DISTRIBUTION LLC", address: "8000 Harwin Dr., Houston, TX 77036, USA", lat: 29.7184335, lng: -95.5246584 },
+{ name: "ROCKEM STYLES", address: "4055 Satterwhite Point Rd, Henderson, NC 27537, USA", lat: 36.4104647, lng: -78.3689359 },
+{ name: "ROCKS HIP HOP FASHION & JEWELRY", address: "413 N Boonville Ave, Springfield, MO 65806, USA", lat: 37.2118521, lng: -93.2924288 },
+{ name: "RODEO BOOTS & WEAR", address: "8700 NE Vancouver Mall Dr Suit 216, Vancouver, WA 98662, USA", lat: 45.6568527, lng: -122.5806839 },
+{ name: "RODEO DURANGO INC. ", address: "11748 E Washington Blvd b, Montebello, CA 90640, USA", lat: 33.998443, lng: -118.1274137 },
+{ name: "RODEO WEAR", address: "5127 Franklin Blvd #2, Sacramento, CA 95820, USA", lat: 38.5287725, lng: -121.4724982 },
+{ name: "RODEO WESTERN #2", address: "3306 San Andres Dr, Odessa, TX 79763, USA", lat: 31.8625368, lng: -102.4012454 },
+{ name: "RODEO WILD WEST", address: "113 N L St, Dinuba, CA 93618, USA", lat: 36.5408567, lng: -119.3905443 },
+{ name: "RODRIGUEZ VAQUERITA", address: "5698 Vernor W, Detroit, MI 48209, USA", lat: 42.3172895, lng: -83.1036397 },
+{ name: "ROD'S WESTERN PALACE", address: "3099 Silver Dr, Columbus, OH 43224, USA", lat: 40.0280469, lng: -82.99528 },
+{ name: "ROGEL FASHIONS", address: "5220 S Pulaski Rd w17, Chicago, IL 60632, USA", lat: 41.7983428, lng: -87.7248098 },
+{ name: "ROJAS JEWELRY LLC", address: "6119 White Horse Rd #6, Greenville, SC 29611, USA", lat: 34.8531467, lng: -82.4547964 },
+{ name: "ROJAS SHOES", address: "509 Grapevine Rd, Vista, CA 92083, USA", lat: 33.198023, lng: -117.2734141 },
+{ name: "ROJA'S WESTERN WEAR", address: "2901 W Washington Ave l110, Las Vegas, NV 89107, USA", lat: 36.1802208, lng: -115.1810463 },
+{ name: "ROSE'S CLASSIC STYLES", address: "18100 Meyers Rd, Detroit, MI 48235, USA", lat: 42.4230641, lng: -83.1694909 },
+{ name: "ROSITA'S WESTERN WEAR", address: "4200 South Fwy #1023, Fort Worth, TX 76115, USA", lat: 32.6864235, lng: -97.3233035 },
+{ name: "ROYCE COLLECTION INC.", address: "25525 W 8 Mile Rd, Redford Township, MI 48240, USA", lat: 42.4415095, lng: -83.3215279 },
+{ name: "RSL CLOTHING & EXCLUSIVES INCORPORATED", address: "6824 Indianapolis Blvd, Hammond, IN 46324, USA", lat: 41.5892465, lng: -87.4813711 },
+{ name: "RUDY EL VAQUERO", address: "2359 A Grand Concourse, Bronx, NY 10468, USA", lat: 40.8592025, lng: -73.8992784 },
+{ name: "RUGGED COWBOY", address: "701 Chicago Ridge Mall, Chicago Ridge, IL 60415, USA", lat: 41.7144582, lng: -87.7824245 },
+{ name: "RUGGED COWBOY", address: "195 Fox Valley Center Dr, Aurora, IL 60504, USA", lat: 41.7582955, lng: -88.212336 },
+{ name: "RUGGED COWBOY", address: "3340 Mall Loop Dr, Joliet, IL 60431, USA", lat: 41.5805172, lng: -88.165576 },
+{ name: "RUGGED COWBOY", address: "7200 Harrison Ave h254, Rockford, IL 61112, USA", lat: 42.2461735, lng: -88.9757903 },
+{ name: "RUSSELLS WESTERN WEAR", address: "6027 N Dale Mabry Hwy, Tampa, FL 33614, USA", lat: 28.0029858, lng: -82.5046723 },
+{ name: "S PADILLA WORK & WESTERN WEAR", address: "2540 Gus Thomasson Rd, Dallas, TX 75228, USA", lat: 32.8339264, lng: -96.6729263 },
+{ name: "SADDLE WESTERN WEAR APPAREL", address: "15800 Main St, Hesperia, CA 92345, USA", lat: 34.4242505, lng: -117.3173901 },
+{ name: "SALAS FASHION", address: "2840 28th St, Boulder, CO 80301, USA", lat: 40.0280749, lng: -105.2578424 },
+{ name: "SALINAS CHARRERIA & WESTERN WEAR", address: "111 E Donovan Rd b, Santa Maria, CA 93458, USA", lat: 34.967954, lng: -120.4348931 },
+{ name: "SALINAS WESTERN WEAR/SALINAS IMPORTS LLC.", address: "18925 Whyte Hardee Blvd, Hardeeville, SC 29927, USA", lat: 32.2776714, lng: -81.0818279 },
+{ name: "SALS INC.", address: "1500 Wisconsin Ave NW, Washington, DC 20007, USA", lat: 38.9089674, lng: -77.0643277 },
+{ name: "SAMS SHOES", address: "6005 Penn Ave, Pittsburgh, PA 15206, USA", lat: 40.4616511, lng: -79.9244196 },
+{ name: "SAM'S SUIT FACTORY OUTLET", address: "25040 Southfield Rd, Southfield, MI 48075, USA", lat: 42.4738683, lng: -83.2207993 },
+{ name: "SAN DIEGO BOOTS", address: "711 Main St, Asbury Park, NJ 07712, USA", lat: 40.2201385, lng: -74.0122244 },
+{ name: "SAN JOSE WESTERN WEAR", address: "119 W Chicago Rd, Sturgis, MI 49091, USA", lat: 41.7994791, lng: -85.4196374 },
+{ name: "SANCHEZ AND SONS", address: "8201 Collinsville Rd, Collinsville, IL 62234, USA", lat: 38.6589336, lng: -90.0523224 },
+{ name: "SANCHEZ BROOTS", address: "9308 Bacardi Ct, Charlotte, NC 28277, USA", lat: 35.0261217, lng: -80.8103471 },
+{ name: "SATELLITES Y CELLULARES GUERRERO", address: "Othello, WA 99344, USA", lat: 46.8259742, lng: -119.1752913 },
+{ name: "SAUCEDO BROTHERS", address: "7001 Bill Hughes Rd, Austin, TX 78745, USA", lat: 30.1925181, lng: -97.7867887 },
+{ name: "SCOTT COLBURN", address: "20411 Farmington Rd, Livonia, MI 48152, USA", lat: 42.4396471, lng: -83.3765327 },
+{ name: "SHOE DOCTORES INC", address: "28.057779,-82.433853, 2235A University Square Mall, Tampa, FL 33612, USA", lat: 28.0571272, lng: -82.4325124 },
+{ name: "SHOE OUTLET", address: "3601 Constitution Blvd Suite F101, West Valley City, UT 84119, USA", lat: 40.6919771, lng: -111.9543124 },
+{ name: "SHOE STOP", address: "2550 Somersville Rd c 29, Antioch, CA 94509, USA", lat: 38.0017754, lng: -121.8428506 },
+{ name: "SHOES & ETC.", address: "4001 E Palmetto St, Florence, SC 29506, USA", lat: 34.1976359, lng: -79.6845487 },
+{ name: "SIERRA WESTERN WEAR INC. ", address: "8707 Westport Rd, Louisville, KY 40242, USA", lat: 38.2810009, lng: -85.5914157 },
+{ name: "SILVAS BOOTS", address: "1728 Donalor Dr, Escondido, CA 92027, USA", lat: 33.1234791, lng: -117.0480043 },
+{ name: "SILVER SPUR WESTERN WEAR INC.", address: "3210 MO-76, Branson, MO 65616, USA", lat: 36.6322097, lng: -93.1749754 },
+{ name: "SK LEATHER N MORE", address: "5728 Colonnade Dr, Rex, GA 30273, USA", lat: 33.5944475, lng: -84.2711467 },
+{ name: "SKIP'S WESTERN OUTFITTERS # 2", address: "State Rte 415, Osteen, FL 32764, USA", lat: 28.8510307, lng: -81.1621817 },
+{ name: "SMOKEY MOUNTAIN STEEL HORSE LLC.", address: "82 Locust Dr, Waynesville, NC 28786, USA", lat: 35.4781481, lng: -83.0123656 },
+{ name: "SOLE RIGHT", address: "310 High St, Portsmouth, VA 23704, USA", lat: 36.8355644, lng: -76.2998177 },
+{ name: "SOMBREROS LA CABA A", address: "608 E University Dr, Edinburg, TX 78539, USA", lat: 26.3000583, lng: -98.1565085 },
+{ name: "SONSEEAHRAY WESTERN STORE", address: "6911 Fremont Pike, Perrysburg, OH 43551, USA", lat: 41.5183913, lng: -83.5280348 },
+{ name: "SOPHIE SHOP", address: "1112 Kansas St, Palmhurst, TX 78573, USA", lat: 26.2718369, lng: -98.3294419 },
+{ name: "SOSI'S WESTERN WEAR", address: "1110 E Market St, Salinas, CA 93905, USA", lat: 36.6774421, lng: -121.6228948 },
+{ name: "SOUTH 40 WESTERN WEAR", address: "West Bend, WI, USA", lat: 43.4252776, lng: -88.1834277 },
+{ name: "SOUTH WEST OF THE HIGH NOON", address: "16167 Fox Hunt Dr, Strongsville, OH 44136, USA", lat: 41.3098262, lng: -81.8131675 },
+{ name: "SPENCERS WESTERN WORLD", address: "7108 66th St N, Pinellas Park, FL 33781, USA", lat: 27.8372964, lng: -82.7289566 },
+{ name: "ST. JOE BOOT", address: "3749 Pacific St, St Joseph, MO 64507, USA", lat: 39.7483885, lng: -94.8015527 },
+{ name: "STACY ADAMS INC", address: "509 Nostrand Ave, Brooklyn, NY 11216, USA", lat: 40.679863, lng: -73.9493666 },
+{ name: "STARK & LEGUM", address: "723 Granby St, Norfolk, VA 23510, USA", lat: 36.8550155, lng: -76.2888362 },
+{ name: "STUDIO NOVA", address: "22153 Coolidge Hwy, Oak Park, MI 48237, USA", lat: 42.458772, lng: -83.182272 },
+{ name: "STYLES OF PERFECTION", address: "425 Sam Gilliland Rd, Oak Hill, OH 45656, USA", lat: 38.8813719, lng: -82.7243876 },
+{ name: "SUIT UP FOR FASHIONS LLC", address: "110 Nottingham Cir, Lafayette, LA 70507, USA", lat: 30.2931039, lng: -91.9984797 },
+{ name: "SUPREME IMPRESSION", address: "3021 Greenmount Ave, Baltimore, MD 21218, USA", lat: 39.3259944, lng: -76.6092176 },
+{ name: "SUZIE'S BOUTIQUE DBA BOOT AMERICA", address: "4991 NJ-42 #3, Blackwood, NJ 08012, USA", lat: 39.7670384, lng: -75.0481258 },
+{ name: "SYLVIA'S FASHION", address: "11723 Airline Dr, Houston, TX 77037, USA", lat: 29.9256485, lng: -95.4093911 },
+{ name: "TALIBS SHOES", address: "1035 E Livingston Ave, Columbus, OH 43205, USA", lat: 39.9494743, lng: -82.9702758 },
+{ name: "TANIA'S BOOTS", address: "1245 E Southern Ave APT 14, Mesa, AZ 85204, USA", lat: 33.3917763, lng: -111.8048015 },
+{ name: "TCCE", address: "427 E 124th St, Cleveland, OH 44108, USA", lat: 41.5456293, lng: -81.5985912 },
+{ name: "TEXAN WESTERN WEAR #2", address: "204 W Belmont Dr, Calhoun, GA 30701, USA", lat: 34.4795112, lng: -84.9398226 },
+{ name: "TEXANOS WESTERN WEAR", address: "11332 Fondren Rd a3, Houston, TX 77035, USA", lat: 29.6548106, lng: -95.5093599 },
+{ name: "TEXAS COWBOY", address: "148 North St #10, Middletown, NY 10940, USA", lat: 41.4498728, lng: -74.4179145 },
+{ name: "THE ALAMO WESTERN WEAR", address: "51 Lexington Ave, Passaic, NJ 07055, USA", lat: 40.8642149, lng: -74.1275975 },
+{ name: "THE BARN", address: "1481 Westgate Pkwy, Dothan, AL 36303, USA", lat: 31.2575284, lng: -85.4347365 },
+{ name: "THE CITY WAREHOUSE", address: "15405 Gratiot Ave # 600, Detroit, MI 48205, USA", lat: 42.448519, lng: -82.9701888 },
+{ name: "THE CLASSIC MAN BY MR. DEE INC.", address: "259 Lasseigne St, Pontiac, MI 48341, USA", lat: 42.6426811, lng: -83.319363 },
+{ name: "THE COBBLERS", address: "22443 Foothill Blvd, Hayward, CA 94541, USA", lat: 37.6760366, lng: -122.082879 },
+{ name: "THE COWBOY", address: "8039 Ritchie Hwy D, Pasadena, MD 21122, USA", lat: 39.1293411, lng: -76.5906994 },
+{ name: "THE COWBOY SHOP", address: "34453 Yucaipa Blvd, Yucaipa, CA 92399, USA", lat: 34.033679, lng: -117.0530264 },
+{ name: "THE GATOR & CO INC", address: "20910 Redwood Rd Suite G, Castro Valley, CA 94546, USA", lat: 37.694258, lng: -122.0734247 },
+{ name: "THE HAT AND SHOE PALACE", address: "110 N Dupont Hwy, New Castle, DE 19720, USA", lat: 39.6661239, lng: -75.6006215 },
+{ name: "THE JEANERY", address: "406 N Main St, Kilmarnock, VA 22482, USA", lat: 37.7205518, lng: -76.3831339 },
+{ name: "THE LEATHER COLLECTION", address: "9024 Kentucky Ave, Kansas City, MO 64138, USA", lat: 38.958768, lng: -94.4828502 },
+{ name: "THE LITTLE RANCH", address: "328 Huguenot St, New Rochelle, NY 10801, USA", lat: 40.9083881, lng: -73.7846699 },
+{ name: "THE LOOK MENS & WOMENS STORE", address: "96 River Oaks Center Dr b 34, Calumet City, IL 60409, USA", lat: 41.5988034, lng: -87.5567922 },
+{ name: "THE MISTER SHOP", address: "806 Downing St, Northbrook, IL 60062, USA", lat: 42.1381379, lng: -87.8798117 },
+{ name: "THE NEW HUB STORE", address: "51 S George St, York, PA 17401, USA", lat: 39.9613662, lng: -76.726737 },
+{ name: "THE NEW WEST", address: "Gonzales, CA, USA", lat: 36.5066295, lng: -121.4443806 },
+{ name: "THE OUTPOST", address: "Trafalgar, IN 46181, USA", lat: 39.4161604, lng: -86.150823 },
+{ name: "THE ROYAL COLLECTION CLOTHING BOUTIQUE", address: "5667 Emporium Square, Columbus, OH 43231, USA", lat: 40.0857247, lng: -82.947436 },
+{ name: "THE TAILORED MEN", address: "1821 Elm St, Cincinnati, OH 45202, USA", lat: 39.1158302, lng: -84.5203142 },
+{ name: "THE TOGGERY WORK & WESTERN WEAR", address: "Corvallis, OR 97339, USA", lat: 44.5619717, lng: -123.2608574 },
+{ name: "THE WESTERN CUT", address: "500 W Main St, Avon Park, FL 33825, USA", lat: 27.5960616, lng: -81.5072528 },
+{ name: "THE WHARF", address: "Ventura, CA 93002, USA", lat: 34.36, lng: -119.3 },
+{ name: "THE WILD WEST #2", address: "802 US-17 BUS, Surfside Beach, SC 29575, USA", lat: 33.6068197, lng: -78.988491 },
+{ name: "THE WORKS", address: "7123 Pacific Ave STE A, Stockton, CA 95207, USA", lat: 38.0139422, lng: -121.3222649 },
+{ name: "THE WORLD OF SHIRTS", address: "5121 Mayfield Rd, Lyndhurst, OH 44124, USA", lat: 41.5203164, lng: -81.4951117 },
+{ name: "TIENDA GUANAJUATO", address: "1410 S Lincoln Ave G, Jerome, ID 83338, USA", lat: 42.7110534, lng: -114.5170949 },
+{ name: "TIENDA LA HIDALGUENSE", address: "130 Science Center Dr, Idaho Falls, ID 83402, USA", lat: 43.5123851, lng: -112.0340207 },
+{ name: "TIENDA MEXICANA LA PRINCESA", address: "7026 Beach Dr SW unit 5, Ocean Isle Beach, NC 28469, USA", lat: 33.8987668, lng: -78.4765287 },
+{ name: "TIENDA MI TIERRA LLC", address: "9889 E 113th Ave, Henderson, CO 80640, USA", lat: 39.9023075, lng: -104.8723892 },
+{ name: "TIENDA VAQUERA EL CHARRITO", address: "421 Chapanoke Rd # 159, Raleigh, NC 27603, USA", lat: 35.7341097, lng: -78.6537543 },
+{ name: "TIERRA CALIENTE", address: "123 York Dr, Lorena, TX 76655, USA", lat: 31.3864092, lng: -97.2091026 },
+{ name: "TIERRA WESTERN WEAR", address: "3908 International Blvd, Oakland, CA 94601, USA", lat: 37.7744307, lng: -122.2185991 },
+{ name: "TIME SQUARE", address: "19150 Livernois, Detroit, MI 48221, USA", lat: 42.4326348, lng: -83.1417577 },
+{ name: "TIMMERMANN'S RANCH AND SADLE SHOP INC", address: "29550 W Roberts Rd, Island Lake, IL 60042, USA", lat: 42.2655697, lng: -88.1971102 },
+{ name: "TIMOTHY P URLING DBA TIMSBOOTS.COM", address: "10830 Martin Luther King Jr Blvd Ste 104, El Paso, TX 79934, USA", lat: 31.92481, lng: -106.44073 },
+{ name: "TINY'S WESTERN SHOP", address: "8403 Research Blvd A, Austin, TX 78758, USA", lat: 30.3580819, lng: -97.7153741 },
+{ name: "TNT WESTERN WEAR", address: "1306 Avenue F, Bay City, TX 77414, USA", lat: 28.9909749, lng: -95.9708996 },
+{ name: "TODAY'S STYLE", address: "2410 E Riverside Dr Suite F5, Austin, TX 78741, USA", lat: 30.2373661, lng: -97.7240716 },
+{ name: "TODO DE PIEL", address: "3637 Gerrard Ave, Indianapolis, IN 46224, USA", lat: 39.8212152, lng: -86.2493602 },
+{ name: "TOMBSTONE WESTERN WEAR", address: "3323 International Blvd, Oakland, CA 94601, USA", lat: 37.7766992, lng: -122.2242998 },
+{ name: "TONY T. CLOTHING", address: "2717 W 12th St, Little Rock, AR 72204, USA", lat: 34.7395589, lng: -92.3042599 },
+{ name: "TONY'S WESTERN WEAR", address: "288 E Stroube St, Oxnard, CA 93036, USA", lat: 34.2358059, lng: -119.1676842 },
+{ name: "TOP BLUE JEAN", address: "654 E Alisal St, Salinas, CA 93905, USA", lat: 36.6732295, lng: -121.6329893 },
+{ name: "TOP'S WESTERN WEAR", address: "3003 Topps Trl, Bossier City, LA 71112, USA", lat: 32.5309387, lng: -93.6693964 },
+{ name: "TRAIL WEST", address: "231 Molly Walton Dr, Hendersonville, TN 37075, USA", lat: 36.3126123, lng: -86.6526887 },
+{ name: "TRES AMIGOS WESTERN WEAR INC.", address: "6514 Pacific Blvd b, Huntington Park, CA 90255, USA", lat: 33.9800277, lng: -118.2247416 },
+{ name: "TRES HERMANOS STYLE", address: "1123 Main St, Delano, CA 93215, USA", lat: 35.771177, lng: -119.2464707 },
+{ name: "TRUE DREW LEATHER CRAFTERS", address: "4600 Sortor Dr, Kansas City, KS 66104, USA", lat: 39.1540783, lng: -94.6850656 },
+{ name: "TRULY BLESSED FASHION", address: "212 N Orchard Ave, Dayton, OH 45417, USA", lat: 39.7568847, lng: -84.2292349 },
+{ name: "TU MODA LLC", address: "1401 University Blvd E, Hyattsville, MD 20783, USA", lat: 38.9861234, lng: -76.9842592 },
+{ name: "TWO AMIGOS WESTERN WEAR", address: "3853 Main St, Oakley, CA 94561, USA", lat: 37.9956395, lng: -121.7073967 },
+{ name: "TWO STEP WESTERN APPAREL", address: "2330 S Belt Line Rd suite 120, Grand Prairie, TX 75051, USA", lat: 32.7112898, lng: -96.9946637 },
+{ name: "UPSCALE FASHIONS BY MARIO LLC", address: "22418 Vera St, Warrensville Heights, OH 44128, USA", lat: 41.42819, lng: -81.5207247 },
+{ name: "URBAN COWBOYS BOOTS & COMPANY", address: "21175 TX-249 #222, Houston, TX 77070, USA", lat: 29.9986849, lng: -95.5828258 },
+{ name: "VALDEZ WESTERN WEAR", address: "417 W Lincoln Hwy, Chicago Heights, IL 60411, USA", lat: 41.5067371, lng: -87.6594532 },
+{ name: "VALENZUELA'S BOOTS", address: "611 E Florence Blvd a, Casa Grande, AZ 85122, USA", lat: 32.8791636, lng: -111.7457961 },
+{ name: "VALLEJO WESTERN WEAR #3", address: "14340 Elsworth St b112 113, Moreno Valley, CA 92553, USA", lat: 33.9126878, lng: -117.2692053 },
+{ name: "VAQUERITA FASHION", address: "1440 S Anaheim Blvd a15, Anaheim, CA 92805, USA", lat: 33.8118923, lng: -117.9038456 },
+{ name: "VAQUERITA LLC.", address: "2208 Finfeather Rd c, Bryan, TX 77801, USA", lat: 30.6452044, lng: -96.3760413 },
+{ name: "VAQUERO BOOTS", address: "1509 Peck Rd, South El Monte, CA 91733, USA", lat: 34.0401831, lng: -118.0374776 },
+{ name: "VAQUERO DE LEON", address: "1500 W 3500 S, West Valley City, UT 84119, USA", lat: 40.6979128, lng: -111.9348293 },
+{ name: "VAQUERO MEX", address: "624 S Kaley St, South Bend, IN 46619, USA", lat: 41.6685413, lng: -86.2873794 },
+{ name: "VAQUERO WESTERN WEAR", address: "5652 S Kedzie Ave, Chicago, IL 60629, USA", lat: 41.7901706, lng: -87.7037698 },
+{ name: "VAQUERO Y MAS #2", address: "404 N Earl Ave #1, Lafayette, IN 47904, USA", lat: 40.421044, lng: -86.8609944 },
+{ name: "VAQUEROS LAND WW LLC", address: "983 Barberry Dr, Greenwood, IN 46143, USA", lat: 39.5818628, lng: -86.0821399 },
+{ name: "VAQUEROS WESTERN WEAR INC.", address: "6601 FM1105, Georgetown, TX 78626, USA", lat: 30.7497692, lng: -97.604908 },
+{ name: "VARIEDADES LA REYNA", address: "133 E Main St, Albertville, AL 35950, USA", lat: 34.2673378, lng: -86.2077915 },
+{ name: "VASMIN", address: "1497 Walnut Dr, Salt Lake City, UT 84116, USA", lat: 40.7788609, lng: -111.934732 },
+{ name: "VENTURI", address: "1418 Wisconsin Ave NW, Washington, DC 20007, USA", lat: 38.908162, lng: -77.0639454 },
+{ name: "VICKER'S WESTERN STORES INC.", address: "1460 Yellowstone Ave, Pocatello, ID 83201, USA", lat: 42.9021575, lng: -112.4509804 },
+{ name: "VICTOR'S WESTERN WEAR", address: "3318 Indianola Ave, Des Moines, IA 50315, USA", lat: 41.5538886, lng: -93.5980591 },
+{ name: "VIEJO OESTE WESTERN WEAR #2", address: "902 Washington Ave, Philadelphia, PA 19147, USA", lat: 39.9362172, lng: -75.1588019 },
+{ name: "VILLA LATINA", address: "3542 Middlefield Rd, Menlo Park, CA 94025, USA", lat: 37.4704377, lng: -122.202479 },
+{ name: "VILLAGE LEATHER", address: "Cherokee, NC, USA", lat: 35.4770574, lng: -83.3205859 },
+{ name: "VOGUE USA", address: "2919 US-206, Columbus, NJ 08022, USA", lat: 40.0540053, lng: -74.7260255 },
+{ name: "WADES WORK WESTERN WEAR", address: "203 Marion Pike, Coal Grove, OH 45638, USA", lat: 38.5010898, lng: -82.6521971 },
+{ name: "WATSONVILLE JEANS", address: "311 Main St, Watsonville, CA 95076, USA", lat: 36.9092405, lng: -121.7560639 },
+{ name: "WAY OUT WEST INC.", address: "1081 US-92, Auburndale, FL 33823, USA", lat: 28.0552945, lng: -81.8284569 },
+{ name: "WEST OF OLE ENGLAND", address: "646 SE Monterey Rd, Stuart, FL 34994, USA", lat: 27.1752525, lng: -80.2440793 },
+{ name: "WESTERN BOOTS FASHION", address: "495 E Shaw Ave STE K03, Fresno, CA 93710, USA", lat: 36.8063103, lng: -119.7789776 },
+{ name: "WESTERN CATTLE", address: "801 US-6, North Utica, IL 61373, USA", lat: 41.3611496, lng: -89.0098317 },
+{ name: "WESTERN MONTERREY", address: "2913 Brentwood Rd, Raleigh, NC 27604, USA", lat: 35.8194834, lng: -78.5968555 },
+{ name: "WESTERN WEAR", address: "4501 S Alameda St f4, Los Angeles, CA 90058, USA", lat: 34.0022369, lng: -118.2413326 },
+{ name: "WHAT'S HAPPENING NOW", address: "1917 3rd Ave N, Birmingham, AL 35203, USA", lat: 33.5157048, lng: -86.8074603 },
+{ name: "WHITEMAN ENTERPRISE", address: "Whispering Oaks Dr, DeSoto, TX 75115, USA", lat: 32.6110753, lng: -96.8878586 },
+{ name: "WHY NOT BOOUTIQUE", address: "6000 Greenbelt Rd, Greenbelt, MD 20770, USA", lat: 38.9994809, lng: -76.9091303 },
+{ name: "WHY NOT FASHION", address: "8111 Concord Mills Boulevard #534, Concord, NC 28027, USA", lat: 35.3682977, lng: -80.720792 },
+{ name: "WILD BOOTS", address: "Parking lot, 1560 N Eastern Ave s space, Las Vegas, NV 89101, USA", lat: 36.1873476, lng: -115.1141518 },
+{ name: "WILD WEST OUTFITTERS", address: "115 Hoover St, Sayre, PA 18840, USA", lat: 41.9962581, lng: -76.525012 },
+{ name: "WILD WILD WEST", address: "Skokie, IL 60076, USA", lat: 42.026064, lng: -87.7271123 },
+{ name: "WILEY'S FASHIONS", address: "6851 Loch Raven Blvd, Baltimore, MD 21286, USA", lat: 39.3833021, lng: -76.5763095 },
+{ name: "WINCHESTER WESTERN WEAR", address: "1185 S Bascom Ave, San Jose, CA 95128, USA", lat: 37.304505, lng: -121.9321214 },
+{ name: "WJ COLT CO.", address: "2832 Dorr Ave b, Fairfax, VA 20598, USA", lat: 38.8750674, lng: -77.2344531 },
+{ name: "WORKBOOTS4U", address: "2533 W Washington Blvd, Los Angeles, CA 90018, USA", lat: 34.0401277, lng: -118.3187535 },
+{ name: "WORLD BOOT AND HAT", address: "150 S Market St, Inglewood, CA 90301, USA", lat: 33.9620453, lng: -118.3515367 },
+{ name: "XPOZHER ACCESSORIES", address: "5203 Moss Glenn Ln, Houston, TX 77088, USA", lat: 29.8790822, lng: -95.4650849 },
+{ name: "YALE SHOES", address: "4637 E Chapman Ave, Orange, CA 92869, USA", lat: 33.7882007, lng: -117.8038733 },
+{ name: "YANERI'S FASHION", address: "4091 W Broad St, Columbus, OH 43228, USA", lat: 39.9522649, lng: -83.1110659 },
+{ name: "YARI LA BOUTIQUE", address: "5218 North W Street g, Pensacola, FL 32505, USA", lat: 30.4627677, lng: -87.251995 },
+{ name: "YOLANDA GARCIA OLMEDO", address: "21731 Eccles St, Canoga Park, CA 91304, USA", lat: 34.2230096, lng: -118.6028243 },
+{ name: "YOLANDA'S CREATIONS", address: "Darby Acres Shopping Center, 4463 Central Ave B, Charlotte, NC 28205, USA", lat: 35.21405, lng: -80.76768 },
+{ name: "YOUNG'S FASHION", address: "114 S 52nd St, Philadelphia, PA 19139, USA", lat: 39.9579788, lng: -75.2255493 },
+{ name: "ZAPATERIA ALAMEDA", address: "4501 S Alameda St g 10, Los Angeles, CA 90058, USA", lat: 34.0022369, lng: -118.2413326 },
+{ name: "ZAPATERIA DE LEON", address: "2029 W 1st St #312, Santa Ana, CA 92703, USA", lat: 33.7464518, lng: -117.8980781 },
+{ name: "ZAPATERIA EL GALLO", address: "8127 Florentine Rd B, Prescott Valley, AZ 86314, USA", lat: 34.5874557, lng: -112.3236999 },
+{ name: "ZAPATERIA GUADALAJARA", address: "1047 W Gardena Blvd, Gardena, CA 90247, USA", lat: 33.8817457, lng: -118.2930834 },
+{ name: "ZAPATERIA HUETAMO", address: "756 N Midway Dr, Escondido, CA 92027, USA", lat: 33.1443403, lng: -117.0558716 },
+{ name: "ZAPATERIA JAUREGUI", address: "6719 W Thomas Rd, Phoenix, AZ 85033, USA", lat: 33.4792403, lng: -112.2057774 },
+{ name: "ZAPATERIA LA BAILARINA", address: "9311 San Fernando Rd #107, Sun Valley, CA 91352, USA", lat: 34.237723, lng: -118.3928732 },
+{ name: "ZAPATERIA MONTANEZ", address: "4305 S Broadway, Los Angeles, CA 90037, USA", lat: 34.0054243, lng: -118.2785592 },
+{ name: "ZAPATERIA PEDRITO CORP.#2", address: "927 Sunset Rd SW, Albuquerque, NM 87105, USA", lat: 35.0673237, lng: -106.675532 },
+{ name: "ZAPATERIA RIGO Y MARCELA", address: "5000 S Arizona Mills Cir Ste 185, Tempe, AZ 85282, USA", lat: 33.3842704, lng: -111.9633743 },
+{ name: "ZAPATERIA SALAZAR", address: "600 S Alvarado St B6, Los Angeles, CA 90057, USA", lat: 34.0591952, lng: -118.274837 },
+{ name: "ZAPATERIA UBIEDO", address: "414 E Oakridge Ct, Visalia, CA 93291, USA", lat: 36.3530756, lng: -119.2888036 },
+{ name: "ZAPATERIA ZACAPU", address: "14650 Parthenia St spc s-5, Panorama City, CA 91402, USA", lat: 34.2273772, lng: -118.452677 },
+{ name: "ZUHA TREND LLC", address: "207 W Loockerman St, Dover, DE 19904, USA", lat: 39.1576805, lng: -75.5274811 },
+  ];
+
+  let map;
+  let markers = [];
+  let infoWindow;
+  let markerCluster; // for clustering
+
+  // Called automatically by Google Maps JS when script loads
+  function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: { lat: 37.5, lng: -96.5 }, // Rough center of US
+      zoom: 4
+    });
+
+    infoWindow = new google.maps.InfoWindow();
+
+    // Click "Search"
+    document.getElementById("searchBtn").addEventListener("click", handleSearch);
+
+    // Press Enter in the input
+    document.getElementById("locationInput").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    });
+
+    // Use my location
+    const locateBtn = document.getElementById("locateBtn");
+    if (locateBtn) {
+      locateBtn.addEventListener("click", handleUseMyLocation);
+    } else {
+      console.warn("locateBtn not found in DOM");
+    }
+    // Clear search
+    const clearBtn = document.getElementById("clearBtn");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", handleClear);
+    }
+  }
+
+  // ---- SEARCH BY CITY / ZIP ----
+  async function handleSearch() {
+    const locationText = document.getElementById("locationInput").value.trim();
+    const radiusMiles = parseFloat(document.getElementById("radiusSelect").value);
+    const statusEl = document.getElementById("status");
+
+    if (!locationText) {
+      statusEl.textContent = "Please enter a city or ZIP code.";
+      return;
+    }
+
+    statusEl.textContent = "Searching…";
+
+    try {
+      const center = await geocodeLocation(locationText);
+      if (!center) {
+        statusEl.textContent = "Could not find that location.";
+        return;
+      }
+
+      // Add distance to each store and filter by radius
+      const results = STORES.map(store => {
+        const distance = haversineMiles(center.lat, center.lng, store.lat, store.lng);
+        return { ...store, distance };
+      })
+      .filter(store => store.distance <= radiusMiles)
+      .sort((a, b) => a.distance - b.distance);
+
+      updateMap(center, results);
+      renderResults(results, radiusMiles);
+
+      statusEl.textContent = results.length
+        ? `Showing ${results.length} store(s) within ${radiusMiles} miles.`
+        : `No stores found within ${radiusMiles} miles.`;
+    } catch (err) {
+      console.error(err);
+      const statusEl = document.getElementById("status");
+      statusEl.textContent = "Error searching. Please try again.";
+    }
+  }
+
+  // ---- USE MY LOCATION ----
+   function handleUseMyLocation() {
+    const radiusMiles = parseFloat(document.getElementById("radiusSelect").value);
+    const statusEl = document.getElementById("status");
+
+    console.log("Use my location clicked");
+    statusEl.textContent = "Getting your location…";
+
+    if (!navigator.geolocation) {
+      statusEl.textContent = "Geolocation is not supported in this browser.";
+      console.error("navigator.geolocation not available");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log("Got position:", pos);
+        const center = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        };
+
+        const results = STORES.map(store => {
+          const distance = haversineMiles(center.lat, center.lng, store.lat, store.lng);
+          return { ...store, distance };
+        })
+        .filter(store => store.distance <= radiusMiles)
+        .sort((a, b) => a.distance - b.distance);
+
+        updateMap(center, results);
+        renderResults(results, radiusMiles);
+
+        statusEl.textContent = results.length
+          ? `Showing ${results.length} store(s) within ${radiusMiles} miles of your location.`
+          : `No stores found within ${radiusMiles} miles of your location.`;
+      },
+      (err) => {
+        console.error("Geolocation error:", err);
+        if (err.code === 1) {
+          statusEl.textContent = "Location permission denied in your browser.";
+        } else if (err.code === 2) {
+          statusEl.textContent = "Position unavailable.";
+        } else if (err.code === 3) {
+          statusEl.textContent = "Location request timed out.";
+        } else {
+          statusEl.textContent = "Unable to get your location.";
+        }
+      }
+    );
+  }
+
+   function handleClear() {
+     const statusEl = document.getElementById("status");
+
+     // Clear input & status
+     document.getElementById("locationInput").value = "";
+     statusEl.textContent = "";
+     document.getElementById("results").innerHTML = "";
+
+     // Clear markers
+     markers.forEach(m => m.setMap(null));
+     markers = [];
+
+     // Clear clusters
+     if (markerCluster) {
+       markerCluster.clearMarkers();
+       markerCluster = null;
+     }
+
+     // Reset map view
+     map.setCenter({ lat: 37.5, lng: -96.5 });
+     map.setZoom(4);
+}
+
+  // 2) Geocode the location to lat/lng
+  function geocodeLocation(locationText) {
+    return new Promise((resolve) => {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ address: locationText }, (results, status) => {
+        if (status === "OK" && results[0]) {
+          const loc = results[0].geometry.location;
+          resolve({ lat: loc.lat(), lng: loc.lng() });
+        } else {
+          console.warn("Geocode failed:", status);
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  // 3) Haversine formula to get miles between two points
+  function haversineMiles(lat1, lng1, lat2, lng2) {
+    const R = 3958.8; // miles
+    const toRad = (x) => x * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  // 4) Show markers for the filtered stores
+  function updateMap(center, stores) {
+  // Clear any old markers
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+
+  // Clear old clusters
+  if (markerCluster) {
+    markerCluster.clearMarkers();
+    markerCluster = null;
+  }
+
+  const bounds = new google.maps.LatLngBounds();
+  bounds.extend(center);
+
+  // 🔹 Search marker (purple) – NOT part of clusters
+  const searchMarker = new google.maps.Marker({
+    position: center,
+    map,
+    title: "Search location",
+    icon: "https://maps.google.com/mapfiles/ms/icons/purple-dot.png",
+    zIndex: 999
+  });
+  markers.push(searchMarker); // we still track it so Clear works
+
+  // 🔹 Store markers – these WILL be clustered
+  const storeMarkers = [];
+
+  stores.forEach(store => {
+    const marker = new google.maps.Marker({
+      position: { lat: store.lat, lng: store.lng },
+      map,
+      title: store.name
+    });
+
+    marker.addListener("click", () => {
+      infoWindow.setContent(
+        `<div><strong>${store.name}</strong><br>${store.address}<br>` +
+        `${store.distance.toFixed(1)} miles away<br>` +
+        `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}" target="_blank" rel="noopener">Get directions</a>` +
+        `</div>`
+      );
+      infoWindow.open(map, marker);
+    });
+
+    markers.push(marker);       // so we can clear all markers later
+    storeMarkers.push(marker);  // only these go into the clusterer
+    bounds.extend(marker.getPosition());
+  });
+
+  // 🔹 Set up clustering only for store markers
+  if (storeMarkers.length) {
+    markerCluster = new markerClusterer.MarkerClusterer({
+      map,
+      markers: storeMarkers
+    });
+  }
+
+  // Adjust map view
+  if (stores.length) {
+    map.fitBounds(bounds);
+  } else {
+    map.setCenter(center);
+    map.setZoom(9);
+  }
+}
+
+  // 5) Show list of stores under the map
+  function renderResults(stores, radiusMiles) {
+    const resultsDiv = document.getElementById("results");
+    if (!stores.length) {
+      resultsDiv.innerHTML = `<p>No stores found within ${radiusMiles} miles.</p>`;
+      return;
+    }
+
+    let html = "";
+    stores.forEach((store, index) => {
+      html += `
+        <div class="store-item" data-index="${index}">
+          <div class="store-name">${store.name}</div>
+          <div class="store-address">${store.address}</div>
+          <div class="store-distance">${store.distance.toFixed(1)} miles away</div>
+        </div>
+      `;
+    });
+    resultsDiv.innerHTML = html;
+
+    // When you click a store in the list, zoom to its marker
+    Array.from(resultsDiv.getElementsByClassName("store-item")).forEach((el, idx) => {
+      el.addEventListener("click", () => {
+        const store = stores[idx];
+        const marker = markers.find(m =>
+          Math.abs(m.getPosition().lat() - store.lat) < 1e-6 &&
+          Math.abs(m.getPosition().lng() - store.lng) < 1e-6
+        );
+        if (marker) {
+          map.setCenter(marker.getPosition());
+          map.setZoom(12);
+          infoWindow.setContent(
+            `<div><strong>${store.name}</strong><br>${store.address}<br>` +
+            `${store.distance.toFixed(1)} miles away<br>` +
+            `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}" target="_blank" rel="noopener">Get directions</a>` +
+            `</div>`
+          );
+          infoWindow.open(map, marker);
+        }
+      });
+    });
+  }
+</script>
+
+<!-- 6) Load Google Maps JS API (put your API key here) -->
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+<script async
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB7ScAgcgPFK5VFfWDGURp7GQ1HhsjVANM&callback=initMap">
+</script>
+
+</body>
+</html>
+
+
