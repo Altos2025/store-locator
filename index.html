@@ -1482,9 +1482,11 @@
   // Adjust map view
   if (stores.length) {
     map.fitBounds(bounds);
+    map.setOptions({ gestureHandling: "greedy" });
   } else {
     map.setCenter(center);
     map.setZoom(9);
+    map.setOptions({ gestureHandling: "greedy" });
   }
 }
 
@@ -1540,6 +1542,7 @@
 
 </body>
 </html>
+
 
 
 
