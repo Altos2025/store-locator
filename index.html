@@ -1244,10 +1244,11 @@
   // Called automatically by Google Maps JS when script loads
   function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
-      center: { lat: 37.5, lng: -96.5 }, // Rough center of US
-      zoom: 4
-      gestureHandling: "greedy"
-    });
+  center: { lat: 37.5, lng: -96.5 }, // Rough center of US
+  zoom: 4,
+  gestureHandling: "greedy"
+});
+
 
     infoWindow = new google.maps.InfoWindow();
 
@@ -1479,21 +1480,17 @@
   }
 
     // Adjust map view
-     if (stores.length) {
-     map.fitBounds(bounds);
-
-    // Re-apply 1-finger pan AFTER fitBounds finishes
-    google.maps.event.addListenerOnce(map, "idle", () => {
-      map.setOptions({ gestureHandling: "greedy" });
-    });
-
+      if (stores.length) {
+    map.fitBounds(bounds);
   } else {
     map.setCenter(center);
-    map.setZoom(9);
-
-    // Re-apply immediately is fine when not fitting bounds
-    map.setOptions({ gestureHandling: "greedy" });
+   map.setZoom(9);
   }
+
+  // ✅ Force 1-finger pan AFTER Google finishes all internal updates
+  setTimeout(() => {
+    map.setOptions({ gestureHandling: "greedy" });
+  }, 0);
 }
 
   // 5) Show list of stores under the map
@@ -1548,6 +1545,7 @@
 
 </body>
 </html>
+
 
 
 
