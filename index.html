@@ -1478,13 +1478,20 @@
     });
   }
 
-  // Adjust map view
-  if (stores.length) {
-    map.fitBounds(bounds);
-    map.setOptions({ gestureHandling: "greedy" });
+    // Adjust map view
+     if (stores.length) {
+     map.fitBounds(bounds);
+
+    // Re-apply 1-finger pan AFTER fitBounds finishes
+    google.maps.event.addListenerOnce(map, "idle", () => {
+      map.setOptions({ gestureHandling: "greedy" });
+    });
+
   } else {
     map.setCenter(center);
     map.setZoom(9);
+
+    // Re-apply immediately is fine when not fitting bounds
     map.setOptions({ gestureHandling: "greedy" });
   }
 }
@@ -1541,6 +1548,7 @@
 
 </body>
 </html>
+
 
 
 
