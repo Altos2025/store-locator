@@ -13,6 +13,20 @@
     --la-border: #ddd;
   }
 
+    .store-directions{
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--la-red);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.store-directions:hover{
+  text-decoration: underline;
+}
+
+
   * {
     box-sizing: border-box;
   }
@@ -1404,6 +1418,8 @@ function initMap() {
   viewMapBtn.addEventListener("click", () => setView("map"));
   viewListBtn.addEventListener("click", () => setView("list"));
 
+  setView("list");   // ✅ default to List on load
+
   if (window.matchMedia("(max-width: 768px)").matches) {
     setView("list");
   }
@@ -1659,48 +1675,74 @@ function initMap() {
   }, 0);
 }
 
-  // 5) Show list of stores under the map
-  function renderResults(stores, radiusMiles) {
-    const resultsDiv = document.getElementById("results");
-    if (!stores.length) {
-      resultsDiv.innerHTML = `<p>No stores found within ${radiusMiles} miles.</p>`;
-      return;
-    }
+// 5) Show list of stores under the map
+function renderResults(stores, radiusMiles) {
+  const resultsDiv = document.getElementById("results");
 
-    let html = "";
-    stores.forEach((store, index) => {
-      html += `
-        <div class="store-item" data-index="${index}">
-          <div class="store-name">${store.name}</div>
-          <div class="store-address">${store.address}</div>
-          <div class="store-distance">${store.distance.toFixed(1)} miles away</div>
-        </div>
-      `;
-    });
-    resultsDiv.innerHTML = html;
-
-    // When you click a store in the list, zoom to its marker
-    Array.from(resultsDiv.getElementsByClassName("store-item")).forEach((el, idx) => {
-      el.addEventListener("click", () => {
-        const store = stores[idx];
-        const marker = markers.find(m =>
-          Math.abs(m.getPosition().lat() - store.lat) < 1e-6 &&
-          Math.abs(m.getPosition().lng() - store.lng) < 1e-6
-        );
-        if (marker) {
-          map.setCenter(marker.getPosition());
-          map.setZoom(12);
-          infoWindow.setContent(
-            `<div><strong>${store.name}</strong><br>${store.address}<br>` +
-            `${store.distance.toFixed(1)} miles away<br>` +
-            `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}" target="_blank" rel="noopener">Get directions</a>` +
-            `</div>`
-          );
-          infoWindow.open(map, marker);
-        }
-      });
-    });
+  if (!stores.length) {
+    resultsDiv.innerHTML = `<p>No stores found within ${radiusMiles} miles.</p>`;
+    return;
   }
+
+  let html = "";
+
+  stores.forEach((store, index) => {
+    const directionsUrl =
+      `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}`;
+
+    html += `
+      <div class="store-item" data-index="${index}">
+        <div class="store-name">${store.name}</div>
+        <div class="store-address">${store.address}</div>
+        <div class="store-distance">${store.distance.toFixed(1)} miles away</div>
+        <a class="store-directions"
+           href="${directionsUrl}"
+           target="_blank"
+           rel="noopener">
+          Get directions
+        </a>
+      </div>
+    `;
+  });
+
+  resultsDiv.innerHTML = html;
+
+  // Prevent clicking "Get directions" from also triggering row click
+  resultsDiv.querySelectorAll(".store-directions").forEach(link => {
+    link.addEventListener("click", e => e.stopPropagation());
+  });
+
+  // Click row to zoom to marker + open infoWindow
+  Array.from(resultsDiv.getElementsByClassName("store-item")).forEach((el, idx) => {
+    el.addEventListener("click", () => {
+      const store = stores[idx];
+
+      const marker = markers.find(m =>
+        Math.abs(m.getPosition().lat() - store.lat) < 1e-6 &&
+        Math.abs(m.getPosition().lng() - store.lng) < 1e-6
+      );
+
+      if (marker) {
+        const directionsUrl =
+          `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}`;
+
+        map.setCenter(marker.getPosition());
+        map.setZoom(12);
+
+        infoWindow.setContent(
+          `<div>
+            <strong>${store.name}</strong><br>
+            ${store.address}<br>
+            ${store.distance.toFixed(1)} miles away<br>
+            <a href="${directionsUrl}" target="_blank" rel="noopener">Get directions</a>
+          </div>`
+        );
+
+        infoWindow.open(map, marker);
+      }
+    });
+  });
+}
 </script>
 
 <!-- 6) Load Google Maps JS API (put your API key here) -->
@@ -1711,6 +1753,7 @@ function initMap() {
 
 </body>
 </html>
+
 
 
 
