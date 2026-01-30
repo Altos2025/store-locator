@@ -1665,6 +1665,21 @@ if (feedbackBtn) {
       title: store.name
     });
 
+marker.addListener("click", () => {
+  const directionsUrl =
+    `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}`;
+
+  infoWindow.setContent(`
+    <div style="min-width:220px">
+      <div style="font-weight:700; margin-bottom:4px;">${store.name}</div>
+      <div style="font-size:13px; color:#555; margin-bottom:6px;">${store.address}</div>
+      <a href="${directionsUrl}" target="_blank" rel="noopener">Get directions</a>
+    </div>
+  `);
+
+  infoWindow.open(map, marker);
+});
+    
     marker.addListener("click", () => {
       infoWindow.setContent(
         `<div><strong>${store.name}</strong><br>${store.address}<br>` +
@@ -1780,6 +1795,7 @@ function renderResults(stores, radiusMiles) {
 
 </body>
 </html>
+
 
 
 
