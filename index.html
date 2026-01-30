@@ -39,6 +39,25 @@
     color: var(--la-charcoal);
   }
 
+    #feedbackBtn{
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  background: #ffffff;
+  color: var(--la-charcoal);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  white-space: nowrap;
+}
+
+#feedbackBtn:hover{
+  border-color: var(--la-red);
+  color: var(--la-red);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
   .container {
     max-width: 1100px;
     margin: 24px auto;
@@ -330,6 +349,7 @@
   <button id="searchBtn">Search</button>
   <button id="locateBtn" type="button">Use my location</button>
   <button id="clearBtn" type="button">Clear</button>
+  <button id="feedbackBtn" type="button">Feedback</button>
   <span id="status" style="margin-left:8px;font-size:13px;color:#666;"></span>
 </div>
 
@@ -1423,6 +1443,13 @@ function initMap() {
   if (window.matchMedia("(max-width: 768px)").matches) {
     setView("list");
   }
+  
+const feedbackBtn = document.getElementById("feedbackBtn");
+if (feedbackBtn) {
+  feedbackBtn.addEventListener("click", () => {
+    window.open("https://docs.google.com/forms/d/e/1FAIpQLSfXBAmLyNHRF50hxdQx0d3aZXYrW6AnB3zZ_Pk2kPP-w41k2Q/viewform?usp=dialog", "_blank", "noopener,noreferrer");
+  });
+}
 
   // 👇 your existing listeners go here
   document.getElementById("searchBtn").addEventListener("click", handleSearch);
@@ -1753,6 +1780,7 @@ function renderResults(stores, radiusMiles) {
 
 </body>
 </html>
+
 
 
 
