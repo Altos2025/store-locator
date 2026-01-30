@@ -239,10 +239,71 @@
     font-size: 12px;
   }
 }
+
+/* so top-right absolute positioning anchors to the container */
+.container {
+  position: relative;
+}
+
+/* pin toggle to top-right */
+.top-right-actions{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 5;
+}
+
+.view-toggle{
+  display: inline-flex;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.view-toggle button{
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--la-charcoal);
+}
+
+.view-toggle button:hover{
+  color: var(--la-red);
+}
+
+.view-toggle button.active{
+  background: var(--la-red);
+  color: #fff;
+}
+
+/* Hide map when list view is selected */
+.container.list-only #map { display: none; }
+.container.list-only #results { max-height: 520px; }
+
+/* Mobile: don’t overlap the title */
+@media (max-width: 768px) {
+  .top-right-actions{
+    position: static;
+    margin: 10px 0 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
   </style>
 </head>
 <body>
 <div class="container">
+<div class="top-right-actions">
+  <div class="view-toggle" role="group" aria-label="Toggle map view">
+    <button id="viewMapBtn" type="button" class="active">Map</button>
+    <button id="viewListBtn" type="button">List</button>
+  </div>
+</div>
+
   <h1>Find a Los Altos Boots Retailer Near You</h1>
 <p>Enter your city or ZIP code to see authorized retailers within your selected radius. Please note that retailer names and map locations are provided for reference and may not always reflect exact store names or precise locations. Inventory varies by retailer, so we recommend visiting their website or contacting them directly for questions about specific styles, sizes, or availability.</p>
 
@@ -1314,13 +1375,47 @@
   let markerCluster; // for clustering
 
   // Called automatically by Google Maps JS when script loads
-  function initMap() {
-    map = new google.maps.Map(document.getElementById("map"), {
-  center: { lat: 37.5, lng: -96.5 }, // Rough center of US
-  zoom: 4,
-  gestureHandling: "greedy"
-});
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: { lat: 37.5, lng: -96.5 },
+    zoom: 4,
+    gestureHandling: "greedy"
+  });
 
+  // ===== Map / List toggle =====
+  const containerEl = document.querySelector(".container");
+  const viewMapBtn = document.getElementById("viewMapBtn");
+  const viewListBtn = document.getElementById("viewListBtn");
+
+  function setView(mode) {
+    const listOnly = (mode === "list");
+
+    containerEl.classList.toggle("list-only", listOnly);
+    viewMapBtn.classList.toggle("active", !listOnly);
+    viewListBtn.classList.toggle("active", listOnly);
+
+    if (!listOnly && window.google && map) {
+      setTimeout(() => {
+        google.maps.event.trigger(map, "resize");
+      }, 50);
+    }
+  }
+
+  viewMapBtn.addEventListener("click", () => setView("map"));
+  viewListBtn.addEventListener("click", () => setView("list"));
+
+  if (window.matchMedia("(max-width: 768px)").matches) {
+    setView("list");
+  }
+
+  // 👇 your existing listeners go here
+  document.getElementById("searchBtn").addEventListener("click", handleSearch);
+  document.getElementById("locationInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") handleSearch();
+  });
+  document.getElementById("locateBtn")?.addEventListener("click", handleUseMyLocation);
+  document.getElementById("clearBtn")?.addEventListener("click", handleClear);
+}
 
     infoWindow = new google.maps.InfoWindow();
 
@@ -1617,6 +1712,7 @@
 
 </body>
 </html>
+
 
 
 
