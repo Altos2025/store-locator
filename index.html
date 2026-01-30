@@ -1416,6 +1416,8 @@ function initMap() {
     gestureHandling: "greedy"
   });
 
+  infoWindow = new google.maps.InfoWindow();
+
   // ===== Map / List toggle =====
   const containerEl = document.querySelector(".container");
   const viewMapBtn = document.getElementById("viewMapBtn");
@@ -1459,31 +1461,6 @@ if (feedbackBtn) {
   document.getElementById("locateBtn")?.addEventListener("click", handleUseMyLocation);
   document.getElementById("clearBtn")?.addEventListener("click", handleClear);
 }
-
-    infoWindow = new google.maps.InfoWindow();
-
-    // Click "Search"
-    document.getElementById("searchBtn").addEventListener("click", handleSearch);
-
-    // Press Enter in the input
-    document.getElementById("locationInput").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        handleSearch();
-      }
-    });
-
-    // Use my location
-    const locateBtn = document.getElementById("locateBtn");
-    if (locateBtn) {
-      locateBtn.addEventListener("click", handleUseMyLocation);
-    } else {
-      console.warn("locateBtn not found in DOM");
-    }
-    // Clear search
-    const clearBtn = document.getElementById("clearBtn");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", handleClear);
-    }
 
   // ---- SEARCH BY CITY / ZIP ----
   async function handleSearch() {
@@ -1659,11 +1636,10 @@ if (feedbackBtn) {
   const storeMarkers = [];
 
   stores.forEach(store => {
-    const marker = new google.maps.Marker({
-      position: { lat: store.lat, lng: store.lng },
-      map,
-      title: store.name
-    });
+  const marker = new google.maps.Marker({
+  position: { lat: store.lat, lng: store.lng },
+  title: store.name
+});
 
 marker.addListener("click", () => {
   const directionsUrl =
@@ -1680,16 +1656,6 @@ marker.addListener("click", () => {
   infoWindow.open(map, marker);
 });
     
-    marker.addListener("click", () => {
-      infoWindow.setContent(
-        `<div><strong>${store.name}</strong><br>${store.address}<br>` +
-        `${store.distance.toFixed(1)} miles away<br>` +
-        `<a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(store.address)}" target="_blank" rel="noopener">Get directions</a>` +
-        `</div>`
-      );
-      infoWindow.open(map, marker);
-    });
-
     markers.push(marker);       // so we can clear all markers later
     storeMarkers.push(marker);  // only these go into the clusterer
     bounds.extend(marker.getPosition());
@@ -1795,6 +1761,7 @@ function renderResults(stores, radiusMiles) {
 
 </body>
 </html>
+
 
 
 
